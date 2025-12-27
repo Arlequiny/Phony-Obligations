@@ -1,0 +1,273 @@
+@font-face {
+    font-family: Carnevalee Freakshow;
+    src: url("public/fonts/Carnevalee Freakshow.ttf") format("truetype");
+    font-weight: normal;
+}
+
+
+
+/*.bg-frame {*/
+/*    margin: 10vh 10vw;*/
+
+/*    --border: 2px;*/
+/*    --cut_size: 100px;*/
+/*    display:inline-block;*/
+/*    position: relative;*/
+/*    z-index: 5;*/
+/*    overflow: hidden;*/
+/*    border: #000 solid var(--border);*/
+
+/*    clip-path: polygon(0 var(--cut_size),var(--cut_size) 0,calc(100% - var(--cut_size)) 0,100% var(--cut_size),*/
+/*                100% calc(100% - var(--cut_size)),calc(100% - var(--cut_size)) 100%,var(--cut_size) 100%,0 calc(100% - var(--cut_size)));*/
+
+/*    background-color: black;*/
+/*}*/
+
+.timer-frame {
+    --border: 2px;
+    --cut: 4vh;
+    --bg: white;
+
+    margin-top: 10vh;
+    position: absolute;
+    top: -6vh;
+    left: 50%;
+    transform: translateX(-50%);
+
+    width: 12vw;
+    height: 6vh;
+
+    background: var(--bg);
+    border: var(--border) solid black;
+
+    z-index: 5;
+}
+
+.timer-grid {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /*font-weight: bold;*/
+    font-family: Carnevalee Freakshow, serif;
+    font-size: 6vh;
+    color: #dfdfdf;
+
+    text-shadow: 2px 0 #000, -2px 0 #000, 0 2px #000, 0 -2px #000,
+    1px 1px #000, -1px -1px #000, 1px -1px #000, -1px 1px #000;
+
+    /*-webkit-text-stroke: 2px #252525;*/
+
+    background-image:
+            linear-gradient(to right, #dddddd 1px, transparent 1px),
+            linear-gradient(to bottom, #dddddd 1px, transparent 1px);
+    background-size: 24px 24px;
+}
+
+.timer-frame span {
+    position: absolute;
+    width: var(--cut);
+    height: var(--cut);
+    background: var(--bg);
+    transform: rotate(45deg);
+}
+
+/* TL */
+.timer-frame .tl {
+    top: calc(-1 * var(--cut) / 2);
+    left: calc(-1 * var(--cut) / 2);
+    border-right: var(--border) solid black;
+}
+
+/* TR */
+.timer-frame .tr {
+    top: calc(-1 * var(--cut) / 2);
+    right: calc(-1 * var(--cut) / 2);
+    border-bottom: var(--border) solid black;
+}
+
+
+.bg-frame {
+    --border: 2px;
+    --cut: 15vh;
+    --border-color: #000;
+    --bg: white;
+
+    position: relative;
+    margin: 10vh 10vw;
+    outline: var(--border) solid var(--border-color);
+    background: var(--bg);
+
+}
+
+.bg-frame span {
+    position: absolute;
+    width: var(--cut);
+    height: var(--cut);
+    background: var(--bg);
+    transform: rotate(45deg);
+}
+
+/* TL */
+.bg-frame .tl {
+    top: calc(-1 * var(--cut) / 2);
+    left: calc(-1 * var(--cut) / 2);
+
+    border-right: var(--border) solid var(--border-color);
+}
+
+/* TR */
+.bg-frame .tr {
+    top: calc(-1 * var(--cut) / 2);
+    right: calc(-1 * var(--cut) / 2);
+
+    border-bottom: var(--border) solid var(--border-color);
+}
+
+/* BL */
+.bg-frame .bl {
+    bottom: calc(-1 * var(--cut) / 2);
+    left: calc(-1 * var(--cut) / 2);
+
+    border-top: var(--border) solid var(--border-color);
+}
+
+/* BR */
+.bg-frame .br {
+    bottom: calc(-1 * var(--cut) / 2);
+    right: calc(-1 * var(--cut) / 2);
+
+    border-left: var(--border) solid var(--border-color);
+}
+
+
+
+/* Contain of frame */
+
+.bg-top {
+    width: 80vw;
+    height: 5vh;
+
+    background-image: linear-gradient(to right, #dddddd 1px, transparent 1px);
+    background-size: 48px 144px;
+
+    border-bottom: 1px solid #878787;
+}
+
+.bg-center {
+    width: 80vw;
+    height: 70vh;
+
+    background-image:
+            linear-gradient(to right, #dddddd 1px, transparent 1px),
+            linear-gradient(to bottom, #dddddd 1px, transparent 1px);
+    background-size: 48px 48px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.bg-bottom {
+    width: 80vw;
+    height: 5vh;
+
+    background-image: linear-gradient(to right, #dddddd 1px, transparent 1px);
+    background-size: 48px;
+
+    border-top: 1px solid #878787;
+}
+
+.field_enemy {
+    width: 100%;
+    height: 50%;
+
+    border-bottom: 1px solid transparent;
+    border-image: repeating-linear-gradient(
+            to right,
+            #878787 0 20px,
+            transparent 20px 40px
+    ) 1;
+}
+
+.field_user {
+    width: 100%;
+    height: 50%;
+
+    /*border-top: 1px solid transparent;*/
+    /*border-image: repeating-linear-gradient(*/
+    /*        to right,*/
+    /*        #878787 0 20px,*/
+    /*        transparent 20px 40px*/
+    /*) 1;*/
+}
+
+
+/* left cut and right button*/
+
+.side-button {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translate(50%, -50%);
+}
+
+.side-button.diamond {
+    position: absolute;
+    right: -33px;
+    top: 50%;
+    transform: translateY(-50%) rotate(45deg);
+
+    width: 64px;
+    height: 64px;
+
+    background: var(--bg);
+    border: 2px dashed var(--border-color);
+
+    padding: 0;
+    cursor: pointer;
+
+    z-index: 4;
+}
+
+.side-button.diamond:hover {
+    background-color: #dcdcdc;
+    transform: translateY(-50%) rotate(45deg) scale(110%);
+}
+
+.side-button.diamond p {
+    transform: rotate(-45deg);
+    font-weight: bold;
+    font-size: 16px;
+    color: #fff;
+
+    text-shadow: 2px 0 #000, -2px 0 #000, 0 2px #000, 0 -2px #000,
+    1px 1px #000, -1px -1px #000, 1px -1px #000, -1px 1px #000;
+}
+
+/*right cut*/
+.side-thing {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translate(50%, -50%);
+}
+.side-thing.diamond {
+    position: absolute;
+    left: -33px;
+    top: 50%;
+    transform: translateY(-50%) rotate(45deg);
+
+    width: 64px;
+    height: 64px;
+
+    background: var(--bg);
+    border-right: 2px solid var(--border-color);
+    border-top: 2px solid var(--border-color);
+
+    padding: 0;
+
+    z-index: 4;
+}

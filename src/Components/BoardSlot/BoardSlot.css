@@ -1,0 +1,18 @@
+.board-slot {
+    width: calc(16px * 8);
+    height: calc(16px * 11);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    position: relative;
+}
+
+.board-slot.over {
+    background: rgba(255, 215, 0, 0.15);
+}
+
+.board-slot.disabled {
+    opacity: 0.6;
+}
