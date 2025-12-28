@@ -1,34 +1,39 @@
-import { useReducer, useState } from "react";
+import {useEffect, useReducer, useState} from "react";
 import {
     DndContext,
     PointerSensor,
     TouchSensor,
     useSensor,
     useSensors,
-    DragOverlay,
-    closestCenter
+    DragOverlay
 } from "@dnd-kit/core";
 
 import GameBoard from "./components/GameBoard/GameBoard";
 import Hand from "./components/Hand/Hand";
 import HandCard from "./components/HandCard/HandCard";
 
-import { gameReducer } from "./game/gameReducer";
-import { createInitialGameState } from "./game/gameInit";
+import { gameReducer } from "./game/engine/gameReducer";
+import { createGameState } from "./game/init/createGameState";
+import { GAME_INTENTS } from "./game/engine/intents";
+import Creature from "./Components/Creature/Creature.jsx";
 
 function App() {
     const [state, dispatch] = useReducer(
         gameReducer,
         null,
-        createInitialGameState
+        () => createGameState("level-1")
     );
 
     const [activeCard, setActiveCard] = useState(null);
+    const [activeCreature, setActiveCreature] = useState(null);
+
+    useEffect(() => {
+        dispatch({ type: "__INIT__" });
+    }, []);
+
 
     const sensors = useSensors(
-        useSensor(PointerSensor, {
-            activationConstraint: { distance: 5 }
-        }),
+        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
         useSensor(TouchSensor)
     );
 
@@ -36,18 +41,45 @@ function App() {
         if (event.active.data.current?.type === "hand-card") {
             setActiveCard(event.active.data.current.card);
         }
+
+        if (event.active.data.current?.type === "board-creature") {
+            const { fromSlotIndex } = event.active.data.current;
+            setActiveCreature(state.player.board.slots[fromSlotIndex]);
+        }
+    };
+
+    const parseSlotId = (id) => {
+        const [, , index] = id.split("-");
+        return Number(index);
     };
 
     const onDragEnd = (event) => {
         setActiveCard(null);
+        setActiveCreature(null);
 
         const { active, over } = event;
         if (!over) return;
 
-        if (over.id === "player-board") {
+        const data = active.data.current;
+        const targetSlotIndex = parseSlotId(over.id);
+
+        if (data?.type === "hand-card") {
+            if (!over.id.startsWith("player-slot")) return;
+
             dispatch({
-                type: "PLAY_CARD",
-                cardId: active.id
+                type: GAME_INTENTS.TRY_PLAY_CARD,
+                cardId: active.id,
+                targetSlotIndex
+            });
+        }
+
+        if (data?.type === "board-creature") {
+            if (data.fromSlotIndex === targetSlotIndex) return;
+
+            dispatch({
+                type: GAME_INTENTS.TRY_MOVE_CREATURE,
+                fromSlotIndex: data.fromSlotIndex,
+                toSlotIndex: targetSlotIndex
             });
         }
     };
@@ -56,14 +88,13 @@ function App() {
     return (
         <DndContext
             sensors={sensors}
-            collisionDetection={closestCenter}
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
         >
             <GameBoard
-                playerCreatures={state.player.board}
-                enemyCreatures={state.enemy.board}
-                canDrop={state.player.board.length < state.limits.maxBoard}
+                playerBoard={state.player.board}
+                enemyBoard={state.enemy.board}
+                phase={state.phase}
             />
 
             <Hand
@@ -72,9 +103,8 @@ function App() {
             />
 
             <DragOverlay>
-                {activeCard ? (
-                    <HandCard card={activeCard} />
-                ) : null}
+                {activeCard && <HandCard card={activeCard} />}
+                {activeCreature && <Creature creature={activeCreature} draggable={false} />}
             </DragOverlay>
         </DndContext>
     );

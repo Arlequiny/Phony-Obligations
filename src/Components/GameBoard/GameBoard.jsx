@@ -1,14 +1,9 @@
 import "./GameBoard.css";
 import CreaturesRow from "../CreaturesRow/CreaturesRow";
-import DropZone from "../DropZone/DropZone";
 
 
 
-export default function GameBoard({
-                                      playerCreatures,
-                                      enemyCreatures,
-                                      canDrop
-                                  }) {
+export default function GameBoard({ playerBoard, enemyBoard, phase }) {
     return (
         <>
             <div className="timer-frame">
@@ -24,20 +19,17 @@ export default function GameBoard({
 
                     <div className="field_enemy">
                         <CreaturesRow
-                            creatures={enemyCreatures}
-                            draggable={false}
+                            slots={enemyBoard.slots}
+                            owner="enemy"
                         />
                     </div>
 
-                    <DropZone id="player-board" disabled={!canDrop}>
-                        <div className="field_user">
-                            <CreaturesRow
-                                creatures={playerCreatures}
-                                draggable={false}
-                            />
-                        </div>
-                    </DropZone>
-
+                    <div className="field_user">
+                        <CreaturesRow
+                            slots={playerBoard.slots}
+                            owner="player"
+                        />
+                    </div>
 
                 </div>
 
