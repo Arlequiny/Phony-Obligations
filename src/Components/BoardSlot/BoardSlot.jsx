@@ -3,11 +3,16 @@ import { CSS } from "@dnd-kit/utilities";
 import Creature from "../Creature/Creature";
 import "./BoardSlot.css";
 
-export default function BoardSlot({ index, creature, owner }) {
+export default function BoardSlot({ index, creature, owner, phase, onStartAttack, attackUI, setAttackUI}) {
     const { setNodeRef: setDropRef, isOver } = useDroppable({
         id: `${owner}-slot-${index}`,
         disabled: owner === "enemy",
     });
+
+    const isDraggable =
+        creature &&
+        owner === "player" &&
+        phase === "DEPLOY_PLAYER";
 
     const {
         setNodeRef: setDragRef,
@@ -23,8 +28,9 @@ export default function BoardSlot({ index, creature, owner }) {
                 owner
             }
             : null,
-        disabled: !creature || owner !== "player"
+        disabled: !isDraggable
     });
+
 
     const style = {
         transform: CSS.Translate.toString(transform)
@@ -34,6 +40,26 @@ export default function BoardSlot({ index, creature, owner }) {
         <div
             ref={setDropRef}
             className={`board-slot ${isOver ? "over" : ""}`}
+            onMouseEnter={() => {
+                if (
+                    owner === "enemy" &&
+                    creature &&
+                    attackUI
+                ) {
+                    setAttackUI(prev => ({
+                        ...prev,
+                        hoveredEnemySlotIndex: index
+                    }));
+                }
+            }}
+            onMouseLeave={() => {
+                if (owner === "enemy" && attackUI) {
+                    setAttackUI(prev => ({
+                        ...prev,
+                        hoveredEnemySlotIndex: null
+                    }));
+                }
+            }}
         >
             {creature && (
                 <div
@@ -41,6 +67,15 @@ export default function BoardSlot({ index, creature, owner }) {
                     style={style}
                     {...attributes}
                     {...listeners}
+                    onMouseDown={(e) => {
+                        if (
+                            owner === "player" &&
+                            phase === "BATTLE_PLAYER" &&
+                            !creature.hasAttacked
+                        ) {
+                            onStartAttack(index, e);
+                        }
+                    }}
                 >
                     <Creature
                         creature={creature}

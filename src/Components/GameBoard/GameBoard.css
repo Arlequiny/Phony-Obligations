@@ -23,6 +23,7 @@
 /*    background-color: black;*/
 /*}*/
 
+/* тут типо таймер и рамка*/
 .timer-frame {
     --border: 2px;
     --cut: 4vh;
@@ -75,14 +76,14 @@
     transform: rotate(45deg);
 }
 
-/* TL */
+/* обрезка рамки таймера ВЛ */
 .timer-frame .tl {
     top: calc(-1 * var(--cut) / 2);
     left: calc(-1 * var(--cut) / 2);
     border-right: var(--border) solid black;
 }
 
-/* TR */
+/* обрезка рамки таймера ВП */
 .timer-frame .tr {
     top: calc(-1 * var(--cut) / 2);
     right: calc(-1 * var(--cut) / 2);
@@ -90,6 +91,8 @@
 }
 
 
+
+/*тут дизайн самого поля*/
 .bg-frame {
     --border: 2px;
     --cut: 15vh;
@@ -111,7 +114,7 @@
     transform: rotate(45deg);
 }
 
-/* TL */
+/* обрезка рамки поля ВЛ */
 .bg-frame .tl {
     top: calc(-1 * var(--cut) / 2);
     left: calc(-1 * var(--cut) / 2);
@@ -119,7 +122,7 @@
     border-right: var(--border) solid var(--border-color);
 }
 
-/* TR */
+/* обрезка рамки поля ВП */
 .bg-frame .tr {
     top: calc(-1 * var(--cut) / 2);
     right: calc(-1 * var(--cut) / 2);
@@ -127,7 +130,7 @@
     border-bottom: var(--border) solid var(--border-color);
 }
 
-/* BL */
+/* обрезка рамки поля НЛ */
 .bg-frame .bl {
     bottom: calc(-1 * var(--cut) / 2);
     left: calc(-1 * var(--cut) / 2);
@@ -135,7 +138,7 @@
     border-top: var(--border) solid var(--border-color);
 }
 
-/* BR */
+/* обрезка рамки поля НП */
 .bg-frame .br {
     bottom: calc(-1 * var(--cut) / 2);
     right: calc(-1 * var(--cut) / 2);
@@ -145,7 +148,7 @@
 
 
 
-/* Contain of frame */
+/* самые поля */
 
 .bg-top {
     width: 80vw;
@@ -205,7 +208,7 @@
 }
 
 
-/* left cut and right button*/
+/* обрезочка слева и кнопка справа*/
 
 .side-button {
     position: absolute;
@@ -229,11 +232,15 @@
     padding: 0;
     cursor: pointer;
 
+    transition:
+            background-color 0.2s ease,
+            box-shadow 0.2s ease,
+            filter 0.2s ease;
+
     z-index: 4;
 }
 
 .side-button.diamond:hover {
-    background-color: #dcdcdc;
     transform: translateY(-50%) rotate(45deg) scale(110%);
 }
 
@@ -247,7 +254,50 @@
     1px 1px #000, -1px -1px #000, 1px -1px #000, -1px 1px #000;
 }
 
-/*right cut*/
+ /* цвета кнопки */
+.side-button.disabled {
+    filter: grayscale(1);
+    cursor: default;
+
+    pointer-events: none;
+}
+
+.side-button.yellow {
+    background: #d6b400;
+    box-shadow: 0 0 12px rgba(214, 180, 0, 0.6);
+}
+
+.side-button.yellow:hover {
+    filter: brightness(1.1);
+}
+
+.side-button.yellow:active {
+    filter: brightness(0.9);
+}
+
+.side-button.green {
+    background: #2ecc71;
+    box-shadow: 0 0 16px rgba(46, 204, 113, 0.8);
+
+    animation: pulse 1.2s infinite ease-in-out;
+}
+
+@keyframes pulse {
+    0%   { box-shadow: 0 0 15px rgba(46,204,113,0.6); }
+    50%  { box-shadow: 0 0 30px rgba(46,204,113,1); }
+    100% { box-shadow: 0 0 15px rgba(46,204,113,0.6); }
+}
+
+.side-button.green:hover {
+    filter: brightness(1.15);
+}
+
+.side-button.green:active {
+    filter: brightness(0.9);
+}
+
+
+/* левый ромбик, тот шо обрезание */
 .side-thing {
     position: absolute;
     left: 0;

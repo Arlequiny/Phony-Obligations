@@ -5,6 +5,6 @@
     transform: translateX(-50%);
 
     display: flex;
-    gap: 12px;
+    gap: 6px;
     z-index: 10;
 }

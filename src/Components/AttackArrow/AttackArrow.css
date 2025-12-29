@@ -1,0 +1,28 @@
+.attack-arrow {
+    position: fixed;
+    height: 48px;
+    transform-origin: 0 calc(50% - 12px);
+    pointer-events: none;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    overflow: visible;
+}
+
+.arrow-body {
+    height: 48px;
+    background-image: url("/images/arrowbody.png");
+    background-size: 48px;
+    background-repeat: repeat-x;
+
+    -webkit-mask-image: -webkit-linear-gradient(to right, transparent 25%, black 50%);
+    mask-image: linear-gradient(to right, transparent 25%, black 50%);
+}
+
+.arrow-head {
+    height: 64px;
+    position: relative;
+    bottom: 12px;
+    background-image: url("/images/arrowhead.png");
+    background-size: 32px;
+}

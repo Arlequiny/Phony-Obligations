@@ -1,9 +1,7 @@
 import "./GameBoard.css";
 import CreaturesRow from "../CreaturesRow/CreaturesRow";
 
-
-
-export default function GameBoard({ playerBoard, enemyBoard, phase }) {
+export default function GameBoard({ playerBoard, enemyBoard, phase, endButtonState, onEndClick, attackUI, setAttackUI, onStartAttack }) {
     return (
         <>
             <div className="timer-frame">
@@ -21,6 +19,8 @@ export default function GameBoard({ playerBoard, enemyBoard, phase }) {
                         <CreaturesRow
                             slots={enemyBoard.slots}
                             owner="enemy"
+                            attackUI={attackUI}
+                            setAttackUI={setAttackUI}
                         />
                     </div>
 
@@ -28,6 +28,8 @@ export default function GameBoard({ playerBoard, enemyBoard, phase }) {
                         <CreaturesRow
                             slots={playerBoard.slots}
                             owner="player"
+                            phase={phase}
+                            onStartAttack={onStartAttack}
                         />
                     </div>
 
@@ -40,7 +42,11 @@ export default function GameBoard({ playerBoard, enemyBoard, phase }) {
                 <span className="bl" />
                 <span className="br" />
 
-                <button className="side-button diamond">
+                <button
+                    className={`side-button diamond ${endButtonState}`}
+                    onClick={onEndClick}
+                    disabled={endButtonState === "disabled"}
+                >
                     <p>End</p>
                 </button>
 

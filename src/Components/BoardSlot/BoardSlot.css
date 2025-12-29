@@ -6,12 +6,42 @@
     align-items: center;
     justify-content: center;
 
-    background-color: rgba(62, 62, 62, 0.15);
+    /*background-color: rgba(62, 62, 62, 0.15);*/
+    background-image: url("/images/slot_frame.png");
+    background-size: calc(16px * 8);
     position: relative;
 }
 
+/*.board-slot.over {*/
+/*    position: relative;*/
+/*    background-image:*/
+/*            url("/images/slot_frame.png"),*/
+/*            linear-gradient(rgba(255, 215, 0, 1), rgba(255, 215, 0, 1));*/
+/*    background-size: calc(16px * 8);*/
+/*    background-repeat: no-repeat;*/
+
+/*    -webkit-mask-image: url("/images/slot_frame.png");*/
+/*    mask-image: url("/images/slot_frame.png");*/
+/*    mask-size: calc(16px * 8);*/
+/*}*/
+
+/*.board-slot.over::before {*/
+/*    content: "";*/
+/*    position: absolute;*/
+/*    inset: -12px;*/
+/*    background: radial-gradient(*/
+/*            circle,*/
+/*            rgba(255, 215, 0, 0.5),*/
+/*            rgba(255, 215, 0, 0)*/
+/*    );*/
+/*    pointer-events: none;*/
+/*    z-index: -1;*/
+/*}*/
+
 .board-slot.over {
-    background: rgba(255, 215, 0, 0.15);
+    background-image: url("/images/slot_frame.png"), linear-gradient(rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.3));
+    background-size: calc(16px * 8);
+    background-blend-mode: multiply;
 }
 
 .board-slot.disabled {

@@ -1,0 +1,10 @@
+.attack-circle {
+    position: fixed;
+    width: 80px;
+    height: 80px;
+    background-image: url("/images/arrowcircle.png");
+    background-size: cover;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1500;
+}

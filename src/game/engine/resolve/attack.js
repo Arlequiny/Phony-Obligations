@@ -9,17 +9,14 @@ export function resolveAttack(state, attackerIndex, defenderIndex) {
 
     if (!attacker || !defender) return state;
 
-    // 1️⃣ Взаємний урон
     defender = applyDamage(defender, attacker.attack);
     attacker = applyDamage(attacker, defender.attack);
 
-    // 2️⃣ Помічаємо, що атакував
     attacker = {
         ...attacker,
         hasAttacked: true
     };
 
-    // 3️⃣ Оновлюємо слоти
     playerSlots[attackerIndex] =
         attacker.health > 0 ? attacker : null;
 
