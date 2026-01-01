@@ -1,7 +1,7 @@
 import "./GameBoard.css";
 import CreaturesRow from "../CreaturesRow/CreaturesRow";
 
-export default function GameBoard({ playerBoard, enemyBoard, phase, endButtonState, onEndClick, attackUI, setAttackUI, onStartAttack }) {
+export default function GameBoard({ playerBoard, enemyBoard, phase, deaths, endButtonState, onEndClick, attackUI, setAttackUI, onStartAttack }) {
     return (
         <>
             <div className="timer-frame">
@@ -21,6 +21,7 @@ export default function GameBoard({ playerBoard, enemyBoard, phase, endButtonSta
                             owner="enemy"
                             attackUI={attackUI}
                             setAttackUI={setAttackUI}
+                            deaths={deaths}
                         />
                     </div>
 
@@ -30,6 +31,7 @@ export default function GameBoard({ playerBoard, enemyBoard, phase, endButtonSta
                             owner="player"
                             phase={phase}
                             onStartAttack={onStartAttack}
+                            deaths={deaths}
                         />
                     </div>
 

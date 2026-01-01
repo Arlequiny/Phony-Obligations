@@ -1,6 +1,7 @@
 import { applyDamage } from "../utils/damage";
 
 export function resolveAttack(state, attackerIndex, defenderIndex) {
+    const attackId = crypto.randomUUID();
     const playerSlots = [...state.player.board.slots];
     const enemySlots = [...state.enemy.board.slots];
 
@@ -9,13 +10,43 @@ export function resolveAttack(state, attackerIndex, defenderIndex) {
 
     if (!attacker || !defender) return state;
 
-    defender = applyDamage(defender, attacker.attack);
-    attacker = applyDamage(attacker, defender.attack);
+    const damageEvents = [];
+
+    const defenderResult = applyDamage(defender, attacker.attack);
+    defender = defenderResult.creature;
+
+    if (defenderResult.damage > 0) {
+        damageEvents.push({
+            target: "enemy",
+            slotIndex: defenderIndex,
+            amount: defenderResult.damage
+        });
+    }
+
+    const attackerResult = applyDamage(attacker, defender.attack);
+    attacker = attackerResult.creature;
+
+    if (attackerResult.damage > 0) {
+        damageEvents.push({
+            target: "player",
+            slotIndex: attackerIndex,
+            amount: attackerResult.damage
+        });
+    }
 
     attacker = {
         ...attacker,
         hasAttacked: true
     };
+
+    const deaths = [];
+
+    if (attacker.health <= 0) {
+        deaths.push({ target: "player", slotIndex: attackerIndex });
+    }
+    if (defender.health <= 0) {
+        deaths.push({ target: "enemy", slotIndex: defenderIndex });
+    }
 
     playerSlots[attackerIndex] =
         attacker.health > 0 ? attacker : null;
@@ -27,17 +58,18 @@ export function resolveAttack(state, attackerIndex, defenderIndex) {
         ...state,
         player: {
             ...state.player,
-            board: {
-                ...state.player.board,
-                slots: playerSlots
-            }
+            board: { ...state.player.board, slots: playerSlots }
         },
         enemy: {
             ...state.enemy,
-            board: {
-                ...state.enemy.board,
-                slots: enemySlots
-            }
+            board: { ...state.enemy.board, slots: enemySlots }
+        },
+        damageEvents,
+        deaths,
+        lastAttack: {
+            id: attackId,
+            attacker: attackerIndex,
+            defender: defenderIndex
         }
     };
 }

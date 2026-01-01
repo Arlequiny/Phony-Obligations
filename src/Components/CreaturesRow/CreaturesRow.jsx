@@ -1,7 +1,7 @@
 import BoardSlot from "../BoardSlot/BoardSlot";
 import "./CreaturesRow.css";
 
-export default function CreaturesRow({ slots, owner, phase, onStartAttack, attackUI, setAttackUI }) {
+export default function CreaturesRow({ slots, owner, phase, onStartAttack, attackUI, setAttackUI, deaths}) {
     return (
         <div className="creatures-row">
             {slots.map((creature, index) => (
@@ -14,6 +14,7 @@ export default function CreaturesRow({ slots, owner, phase, onStartAttack, attac
                     onStartAttack={onStartAttack}
                     attackUI={attackUI}
                     setAttackUI={setAttackUI}
+                    deaths={deaths}
                 />
 
             ))}

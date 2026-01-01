@@ -41,6 +41,7 @@ export async function animateCreatureAttack({ attackerEl, defenderEl, onImpact})
     });
 
     /* damage */
+    // await delay(60);
     onImpact?.();
 
     // тряска
@@ -54,7 +55,6 @@ export async function animateCreatureAttack({ attackerEl, defenderEl, onImpact})
         easing: "ease-out"
     });
 
-    // await delay(60);
 
     /* dash back */
     await animate(attackerEl, [
