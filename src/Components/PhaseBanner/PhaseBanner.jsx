@@ -1,20 +1,29 @@
+import { useEffect, useState } from "react";
 import "./PhaseBanner.css";
+import { EVENTS } from "../../engine/types";
+import { useGame } from "../../game/ui/context/GameProvider";
 
-const PHASE_LABELS = {
-    DEPLOY_PLAYER: "Deployment Phase",
-    BATTLE_PLAYER: "Your Turn",
-    BATTLE_ENEMY: "Enemy Turn",
-    BATTLE_RESULT: "Battle Result",
-    GAME_END: "Game Over"
-};
+export default function PhaseBanner() {
+    const { currentEvent } = useGame();
+    const [visible, setVisible] = useState(false);
+    const [text, setText] = useState("");
 
-export default function PhaseBanner({ phase, visible }) {
+    useEffect(() => {
+        if (currentEvent?.type === EVENTS.TRANSITION_PHASE) {
+            const phaseName = currentEvent.payload.phase.replace("_", " "); // BATTLE_PLAYER -> BATTLE PLAYER
+            setText(phaseName);
+            setVisible(true);
+        } else {
+            setVisible(false);
+        }
+    }, [currentEvent]);
+
     if (!visible) return null;
 
     return (
         <div className="phase-banner-overlay">
-            <div className="phase-banner">
-                {PHASE_LABELS[phase] ?? phase}
+            <div className="phase-banner-text">
+                {text}
             </div>
         </div>
     );

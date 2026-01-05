@@ -1,35 +1,155 @@
+@font-face {
+    font-family: Carnevalee Freakshow;
+    src: url("/fonts/Carnevalee Freakshow.ttf") format("truetype");
+    font-weight: normal;
+}
+
 .hand-card {
+    position: relative;
     width: calc(16px * 8);
     height: calc(16px * 11);
-    background: #c9b28a;
-    border: 2px solid #5e4a2f;
-    border-radius: 8px;
+    /*background: #c9b28a;*/
+    /*border: 2px solid #5e4a2f;*/
+    /*border-radius: 8px;*/
 
-    transform: scale(0.85) rotate(-3deg);
+
+    transform: scale(0.85) rotate(-5deg);
     transition: transform 0.2s;
 
     cursor: grab;
+
+    z-index: 100;
 }
 
 .hand-card:hover {
-    transform: scale(1) rotate(0deg);
+    transform: scale(1.75) rotate(0deg) translateY(-48px);
+    z-index: 107;
 }
 
-.hand-card .image {
-    height: 100px;
-    background: #999;
+.hand-card .card-background{
+    position: absolute;
+    width: calc(16px * 8);
+    height: calc(16px * 11);
+    background-image: url("/images/card_baze.png");
+    background-size: calc(16px * 8);
+
+    z-index: 102;
 }
 
-.hand-card .name {
+.hand-card .card-image-container { position: absolute; bottom: 0; z-index: 101;}
+.hand-card .card-image-container img {
+    width: calc(16px * 6);
+    height: calc(16px * 8);
+    margin-left: 16px;
+    margin-bottom: 36px;
+    object-fit: cover;
+}
+
+.hand-card .card-name {
+    position: absolute;
+    bottom: 0;
+
     text-align: center;
-    font-weight: bold;
-    padding: 6px;
+    font-weight: lighter;
+    font-family: Carnevalee Freakshow, serif;
+    font-size: 18px;
+    fill: #fff;
+
+    text-shadow:
+            0 1px 0 rgba(0,0,0, 0.75),
+            0 0 1px rgba(0,0,0, 1);
+
+    width: calc(16px * 8);
+    height: calc(16px * 11);
+
+    background-image: url("/images/card_nametag.png");
+    background-size: calc(16px * 8);
+
+    z-index: 103;
 }
 
-.drag-overlay {
-    transform: scale(1) rotate(0deg) !important;
-    cursor: grabbing;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+.hand-card .card-desc {
+    position: absolute;
+    width: 88px;
+    height: 50px;
 
-    pointer-events: none;
+    top: 120px;
+    left: 22px;
+
+    text-align: center;
+    font-weight: lighter;
+    font-family: Carnevalee Freakshow, serif;
+    font-size: 12px;
+    color: #fff;
+
+    text-shadow:
+            0 1px 0 rgba(0,0,0, 0.75),
+            0 0 1px rgba(0,0,0, 1);
+
+    z-index: 103;
+}
+
+.hand-card .stat {
+    position: absolute;
+
+    width: 48px;
+    height: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-family: Carnevalee Freakshow, serif;
+    font-size: 40px;
+    color: #fff;
+
+    text-shadow:
+            2px   2px 0 rgba(0,0,0, 0.75),
+            0 2px 2px rgba(0,0,0, 1);
+
+    z-index: 104;
+}
+
+.hand-card .attack {
+    width: 44px;
+    height: 44px;
+
+    left: -16px;
+    bottom: 0;
+
+    background-image: url("/images/attack.png");
+    background-size: 48px;
+    background-repeat: no-repeat;
+
+    padding-top: 0;
+    padding-left: 8px;
+}
+
+.hand-card .health {
+    --health-height: 48px;
+    right: -16px;
+    bottom: -4px;
+
+    height: var(--health-height);
+    width: calc(var(--health-height) * 0.85);
+    background-image: url("/images/blood.png");
+    background-size: calc(var(--health-height) * 0.85);
+    background-repeat: no-repeat;
+
+    padding-top: 8px;
+}
+
+.hand-card .cost-badge {
+    top: 0;
+    left: -16px;
+    background-image: url("/images/money.png");
+    background-size: 48px;
+    background-repeat: no-repeat;
+
+    filter: brightness(1.1);
+
+    padding-bottom: 6px;
+}
+
+#curve {
+    fill: transparent;
 }

@@ -18,23 +18,18 @@
     display: flex;
     justify-content: center;
     align-items: center;
-
-    touch-action: none;
 }
-
-.creature.enemy {
-    cursor: default;
-}
-
 
 .creature-image img {
     width:  calc(16px * 6);
     height: calc(16px * 8);
     border-radius: 50% / 60%;
     border: 3px ridge #333;
+
+    object-fit: cover;
 }
 
-.stat {
+.creature .stat {
     position: absolute;
 
     /*background: #f0f0f0;*/
@@ -54,13 +49,20 @@
     font-size: 40px;
     color: #fff;
 
-    text-shadow: 2px 0 #000, -2px 0 #000, 0 2px #000, 0 -2px #000,
-    1px 1px #000, -1px -1px #000, 1px -1px #000, -1px 1px #000;
-
-    /*-webkit-text-stroke: 2px #252525;*/
+    text-shadow:
+            2px   2px 0 rgba(0,0,0, 0.75),
+            0 2px 2px rgba(0,0,0, 1);
 }
 
-.attack {
+.creature .stat-buffed {
+    color: #2ecc71 !important;
+}
+
+.creature .stat-damaged {
+    color: #ff8e81 !important;
+}
+
+.creature .attack {
     left: 2px;
     bottom: 4px;
     background-image: url("/images/attack.png");
@@ -71,7 +73,7 @@
     padding-left: 2px;
 }
 
-.health {
+.creature .health {
     right: 2px;
     bottom: 6px;
 
@@ -84,7 +86,7 @@
     padding-top: 12px;
 }
 
-.armor {
+.creature .armor {
     right: 2px;
     bottom: 64px;
     background-image: url("/images/shield.png");

@@ -1,23 +1,29 @@
-import { forwardRef } from "react";
 import "./Creature.css";
 
-const Creature = forwardRef(function Creature({ creature, dying }, ref) {
-    const isDying = creature.health > 0 && dying;
+export default function Creature({ creature }) {
+    if (!creature) return null;
+
+    const { attack, health, armor } = creature.currentStats;
+    const baseStats = creature.stats;
+
+    const getStatClass = (current, base) => {
+        if (current > base) return "stat-buffed"; // Зелений
+        if (current < base) return "stat-damaged"; // Червоний (для атаки це рідкість, але можливо)
+        return ""; // Білий
+    };
 
     return (
-        <div className="creature" ref={ref}>
+        <div className="creature">
             <div className="creature-image">
-                <img src={creature.image} alt={creature.name} />
+                <img src={`${import.meta.env.BASE_URL}${creature.image}`} alt={creature.name} />
             </div>
 
-            <div className="stat attack">{creature.attack}</div>
-            <div className="stat health">{isDying ? 0 : creature.health}</div>
+            <div className={`stat attack ${getStatClass(attack, baseStats.attack)}`}> {attack} </div>
+            <div className={`stat health ${health < baseStats.health ? "stat-damaged" : ""}`}> {health} </div>
 
-            {creature.armor > 0 && (
-                <div className="stat armor">{creature.armor}</div>
+            {armor > 0 && (
+                <div className="stat armor">{armor}</div>
             )}
         </div>
     );
-});
-
-export default Creature;
+}
