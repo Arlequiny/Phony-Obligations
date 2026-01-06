@@ -1,4 +1,5 @@
-import { EVENTS } from "../types";
+import {EVENTS} from "../types";
+import {KILL_REWARDS, RARITY} from "../../data/constants";
 
 export function resolveAttack(initialState, { attackerInstanceId, defenderInstanceId }) {
     const transitions = [];
@@ -67,28 +68,64 @@ export function resolveAttack(initialState, { attackerInstanceId, defenderInstan
 
     currentState = stateAfterDamage;
 
-    // --- ФАЗА 3: Смерть ---
+// --- ФАЗА 3: Смерть та Нагороди ---
     const deaths = [];
     const updatesForDeath = [];
 
-    // Перевіряємо health <= 0
+    // Функція обробки смерті
+    const processDeath = (deadCardLoc, killerLoc) => {
+        deaths.push({ owner: deadCardLoc.owner, index: deadCardLoc.index });
+        updatesForDeath.push({ owner: deadCardLoc.owner, index: deadCardLoc.index, card: null });
+
+        // НАРАХУВАННЯ ГРОШЕЙ
+        // Якщо вбив гравець (killer.owner === 'player') - даємо гроші
+        // АБО: Зазвичай гроші дають тільки ГРАВЦЮ за вбивство ворогів.
+        if (deadCardLoc.owner === "enemy") {
+            // Треба оновити гроші гравця.
+            // УВАГА: Ми не можемо просто написати currentState.player.money +=... бо це мутація
+            // Нам треба буде врахувати це при створенні stateAfterDeath
+            return KILL_REWARDS[deadCardLoc.card.rarity] || KILL_REWARDS[RARITY.COMMON];
+        }
+        return 0;
+    };
+
+    let moneyEarned = 0;
+
+    // Перевірка смерті Атакуючого
     if (newAttacker.currentStats.health <= 0) {
-        deaths.push({ owner: attackerLoc.owner, index: attackerLoc.index });
-        updatesForDeath.push({ owner: attackerLoc.owner, index: attackerLoc.index, card: null });
+        moneyEarned += processDeath(attackerLoc, defenderLoc);
     }
 
+    // Перевірка смерті Захисника
     if (newDefender.currentStats.health <= 0) {
-        deaths.push({ owner: defenderLoc.owner, index: defenderLoc.index });
-        updatesForDeath.push({ owner: defenderLoc.owner, index: defenderLoc.index, card: null });
+        moneyEarned += processDeath(defenderLoc, attackerLoc);
     }
 
     if (deaths.length > 0) {
-        const stateAfterDeath = cloneStateWithUpdates(currentState, updatesForDeath);
+        // Створюємо фінальний стейт з урахуванням смертей І грошей
+        let stateAfterDeath = cloneStateWithUpdates(currentState, updatesForDeath);
+
+        // Додаємо гроші
+        if (moneyEarned > 0) {
+            stateAfterDeath = {
+                ...stateAfterDeath,
+                player: {
+                    ...stateAfterDeath.player,
+                    money: stateAfterDeath.player.money + moneyEarned
+                }
+            };
+        }
+
+        // Запам'ятовуємо, що гравець втратив істоту (для Рятівного Деплою)
+        const playerLostCreature = deaths.some(d => d.owner === "player");
+        if (playerLostCreature) {
+            stateAfterDeath.meta.playerDiedThisTurn = true;
+        }
 
         transitions.push({
             type: EVENTS.DEATH_PROCESS,
             state: stateAfterDeath,
-            payload: { deaths }
+            payload: { deaths, moneyEarned } // Передаємо інфо про смерть
         });
 
         currentState = stateAfterDeath;

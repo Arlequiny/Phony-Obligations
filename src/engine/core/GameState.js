@@ -27,7 +27,8 @@ export function createInitialState(levelId) {
     return {
         meta: {
             levelId: level.id,
-            turn: "DEPLOY",
+            turn: 1,
+            playerDiedThisTurn: true,
             isGameOver: false
         },
         phase: PHASES.DEPLOY_PLAYER,

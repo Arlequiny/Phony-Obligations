@@ -1,6 +1,7 @@
 import { createInitialState } from "./core/GameState";
 import { resolveAttack } from "./actions/attack";
 import { resolveEndPhase } from "./actions/turnManager";
+import { checkGameOver } from "./systems/gameOver";
 import {INTENTS, PHASES} from "./types";
 
 export class GameEngine {
@@ -25,19 +26,36 @@ export class GameEngine {
                 return this.handleDeploy(intent);
 
             case INTENTS.ATTACK:
-                { if (this.state.phase !== PHASES.BATTLE_PLAYER) {
-                    console.warn("Can only attack in BATTLE_PLAYER phase");
-                    return [];
+                {
+                    if (this.state.phase !== PHASES.BATTLE_PLAYER && this.state.phase !== PHASES.BATTLE_ENEMY) {
+                        console.warn("Wrong phase for attack");
+                        return [];
+                    }
+                    // Тут ми викликаємо чисту функцію й оновлюємо стейт
+                    const attackResult = resolveAttack(this.state, intent);
+                    this.state = attackResult.finalState;
+
+                    const gameResult = checkGameOver(this.state);
+                    if (gameResult) {
+                        this.state.phase = PHASES.GAME_OVER;
+                        this.state.meta.gameResult = gameResult;
+
+                        // Додаємо подію кінця гри в кінець анімацій
+                        attackResult.transitions.push({
+                            type: "GAME_OVER",
+                            payload: { result: gameResult }
+                        });
+                    }
+
+                    return attackResult.transitions;
                 }
-                // Тут ми викликаємо чисту функцію і оновлюємо стейт
-                const attackResult = resolveAttack(this.state, intent);
-                this.state = attackResult.finalState;
-                return attackResult.transitions; }
 
             case INTENTS.END_PHASE:
-                { const phaseResult = resolveEndPhase(this.state);
-                this.state = phaseResult.finalState;
-                return phaseResult.transitions; }
+                {
+                    const phaseResult = resolveEndPhase(this.state);
+                    this.state = phaseResult.finalState;
+                    return phaseResult.transitions;
+                }
             default:
                 console.warn("Unknown intent:", intent.type);
                 return [];

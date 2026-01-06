@@ -6,8 +6,10 @@ import { DraggableCard } from "./dnd/DraggableCard";
 import { DroppableSlot } from "./dnd/DroppableSlot";
 import { INTENTS, PHASES } from "../../engine/types.js";
 
+// hooks
 import { useAttackInput } from "./hooks/useAttackInput";
 import { useDamageSystem } from "./hooks/useDamageSystem";
+import { useCreatureAnimation } from "./hooks/useCreatureAnimation";
 
 // graphic
 import HandCard from "../../Components/HandCard/HandCard";
@@ -16,10 +18,11 @@ import BoardSlot from "../../Components/BoardSlot/BoardSlot";
 import AttackArrow from "../../Components/AttackArrow/AttackArrow";
 import PhaseBanner from "../../Components/PhaseBanner/PhaseBanner";
 import DamageIndicator from "../../Components/DamageIndicator/DamageIndicator";
+import GameOverModal from "../../Components/GameOverModal/GameOverModal";
 import "./GameLayout.css";
 
 export default function GameLayout() {
-    const { state, exitLevel, dispatch, isAnimating, currentEvent } = useGame();
+    const { state, exitLevel, startLevel, dispatch, isAnimating, currentEvent } = useGame();
     const [activeDragItem, setActiveDragItem] = useState(null);
 
     const { attackArrow, isValidTarget, onStartAttack } = useAttackInput({
@@ -28,6 +31,7 @@ export default function GameLayout() {
         isAnimating
     });
 
+    useCreatureAnimation(currentEvent);
     const damageIndicators = useDamageSystem(currentEvent);
 
     if (!state) return <div>Loading...</div>;
@@ -111,6 +115,14 @@ export default function GameLayout() {
                 </>
             )}
 
+            {state.phase === "GAME_OVER" && (
+                <GameOverModal
+                    result={state.meta.gameResult}
+                    onRestart={() => startLevel(state.meta.levelId)}
+                    onMenu={exitLevel}
+                />
+            )}
+
             <div className={`game-container ${attackArrow ? "attacking-cursor" : ""}`}>
 
                 <header className="game-header">
@@ -120,7 +132,7 @@ export default function GameLayout() {
 
                         <div className="turn-box">
                             <span className="label">TURN</span>
-                            <span className="value">{state.meta.turn}</span>
+                            <span className="value">{state.meta.playerDiedThisTurn ? "DEPLOY" : state.meta.turn}</span>
                         </div>
 
                         <div className="divider" />
@@ -152,28 +164,36 @@ export default function GameLayout() {
 
                         {/* PLAYER FIELD */}
                         <div className="field_user board-row">
-                            {player.board.map((slot, index) => (
-                                <div key={`player-${index}`} style={{ position: 'relative' }}
-                                     data-slot-owner="player" data-slot-index={index}
-                                >
-                                    <BoardSlot>
-                                        {isDeployPhase ? (
-                                            <DroppableSlot index={index}>
-                                                {slot && <Creature creature={slot} />}
-                                            </DroppableSlot>
-                                        ) : (
-                                            slot && <Creature creature={slot} />
-                                        )}
-                                    </BoardSlot>
+                            {player.board.map((slot, index) => {
+                                const canAttack = isBattlePhase && slot && !slot.hasAttacked;
 
-                                    {isBattlePhase && slot && (
-                                        <div
-                                            className="interactionLayer"
-                                            onPointerDown={(e) => onStartAttack(e, slot, index)}
-                                        />
-                                    )}
-                                </div>
-                            ))}
+                                return (
+                                    <div
+                                        key={`player-${index}`}
+                                        style={{ position: 'relative' }}
+                                        data-slot-owner="player"
+                                        data-slot-index={index}
+                                        className={canAttack ? "slot-active-creature" : ""}
+                                    >
+                                        <BoardSlot>
+                                            {isDeployPhase ? (
+                                                <DroppableSlot index={index}>
+                                                    {slot && <Creature creature={slot} />}
+                                                </DroppableSlot>
+                                            ) : (
+                                                slot && <Creature creature={slot} />
+                                            )}
+                                        </BoardSlot>
+
+                                        {isBattlePhase && slot && (
+                                            <div
+                                                className="interactionLayer"
+                                                onPointerDown={(e) => onStartAttack(e, slot, index)}
+                                            />
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
 

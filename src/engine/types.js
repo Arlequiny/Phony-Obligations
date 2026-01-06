@@ -13,10 +13,11 @@ export const EVENTS = {
     INIT: "INIT",
     TRANSITION_PHASE: "TRANSITION_PHASE",
     ERROR: "ERROR",
-    ATTACK_INIT: "ATTACK_INIT",      // Початок замаху
-    DAMAGE_DEALT: "DAMAGE_DEALT",    // Нанесення шкоди
-    DEATH_PROCESS: "DEATH_PROCESS",  // Обробка смерті (видалення з дошки)
-    TURN_START: "TURN_START"         // Початок ходу (для тригерів)
+    ATTACK_INIT: "ATTACK_INIT",       // Початок замаху
+    DAMAGE_DEALT: "DAMAGE_DEALT",     // Нанесення шкоди
+    DEATH_PROCESS: "DEATH_PROCESS",   // Обробка смерті (видалення з дошки)
+    TURN_START: "TURN_START",         // Початок ходу (для тригерів)
+    GAME_OVER: "GAME_OVER"
 };
 
 export const PHASES = {

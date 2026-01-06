@@ -6,29 +6,8 @@
 
 
 
-.attack-circle {
-    position: fixed;
-    width: 80px;
-    height: 80px;
-    background-image: url("/images/arrowcircle.png");
-    background-size: cover;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 1500;
-}
-
-
-
 .game-container {
     min-height: 100vh;
-}
-
-.attacking-cursor {
-    cursor: crosshair !important;
-}
-
-.attacking-cursor * {
-    cursor: crosshair !important;
 }
 
 /* == HEADER == */
@@ -277,22 +256,33 @@
     border: 2px dashed #000;
     cursor: pointer;
 
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.35),
+                0px 7px 13px -3px rgba(0, 0, 0, 0.25),
+          inset 0px -3px 0px rgba(255,255,255,0.25);
+
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+
     z-index: 95;
 }
 
-.side-button.diamond:hover {
-    transform: translateY(-50%) rotate(45deg) scale(1.1);
-}
+/*.side-button.diamond:hover {*/
+/*    transform: translateY(-50%) rotate(45deg) scale(1.1);*/
+/*}*/
 
 .side-button.diamond.disabled {
     filter: grayscale(1);
     cursor: not-allowed;
     pointer-events: none;
+
+    box-shadow: inset 0px 3px 7px rgba(0,0,0,0.35) !important;
 }
 
 .side-button.diamond.yellow {
     background: #d6b400;
-    box-shadow: 0 0 12px rgba(214, 180, 0, 0.6);
+    border: 2px dashed #000;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.35),
+                0px 7px 13px -3px rgba(0, 0, 0, 0.25),
+          inset 0px -3px 0px rgba(255,255,255,0.25);
 }
 
 .side-button.diamond.yellow:hover {
@@ -301,11 +291,15 @@
 
 .side-button.diamond.yellow:active {
     filter: brightness(0.9);
+    transform: translateY(-50%) rotate(45deg) translateY(2px);
+    box-shadow: inset 0px 3px 7px rgba(0,0,0,0.35);
 }
 
 .side-button.diamond.green {
     background: #2ecc71;
-    box-shadow: 0 0 16px rgba(46, 204, 113, 0.8);
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.35),
+                0px 7px 13px -3px rgba(0, 0, 0, 0.25),
+          inset 0px -3px 0px rgba(255,255,255,0.25);
 
     animation: pulse 1.2s infinite ease-in-out;
 }
@@ -316,6 +310,8 @@
 
 .side-button.diamond.green:active {
     filter: brightness(0.9);
+    transform: translateY(-50%) rotate(45deg) translateY(2px);
+    box-shadow: inset 0px 3px 7px rgba(0,0,0,0.35) !important;
 }
 
 @keyframes pulse {
@@ -328,11 +324,11 @@
     transform: rotate(-45deg);
     font-weight: bold;
     font-size: 16px;
-    color: #fff;
+    color: #000;
 
     text-shadow:
-            1px   1px 0 rgba(0,0,0, 0.5),
-            0 1px 2px rgba(0,0,0, 0.75);
+            1px   1px 0 rgba(0,0,0, 0.25),
+            0 1px 2px rgba(0,0,0, 0.5);
 }
 
 /* == LEFT DECOR == */
@@ -358,7 +354,7 @@
 .player-hand-container {
     position: fixed;
     left: 50%;
-    bottom: 0vh;
+    bottom: 0;
     transform: translateX(-50%);
 
     z-index: 99;
@@ -423,6 +419,26 @@
     font-variant-numeric: tabular-nums;
 }
 
+ /*== technical shit ==*/
+
+.attacking-cursor {
+    cursor: crosshair !important;
+}
+
+.attacking-cursor * {
+    cursor: crosshair !important;
+}
+
+.attack-circle {
+    position: fixed;
+    width: 80px;
+    height: 80px;
+    background-image: url("/images/arrowcircle.png");
+    background-size: cover;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1500;
+}
 
 .interactionLayer {
     position: absolute;
@@ -432,4 +448,34 @@
     height: 100%;
     z-index: 10;
     touch-action: none;
+}
+
+.slot-active-creature .creature {
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.6);
+    animation: pulse-green-glow 2s infinite;
+    cursor: pointer;
+}
+
+@keyframes pulse-green-glow {
+    0% { box-shadow: 0 0 10px rgba(46, 204, 113, 0.4); }
+    50% { box-shadow: 0 0 25px rgba(46, 204, 113, 0.8); }
+    100% { box-shadow: 0 0 10px rgba(46, 204, 113, 0.4); }
+}
+
+/* ПІДСВІТКА ВОРОГА ПРИ НАВЕДЕННІ (Це вже працює через :hover у BoardSlot, але можна посилити) */
+.board-slot:hover [data-slot-type="enemy"] .creature {
+    box-shadow: 0 0 20px rgba(255, 87, 0, 1),
+                0 0 10px rgba(255, 87, 0, .75)!important;
+}
+
+/* СТАТИЧНА ЧЕРВОНА (коли тягнемо стрілку) - можна додати через JS клас на контейнер */
+.game-container.attacking-cursor [data-slot-type="enemy"] .creature {
+    box-shadow: 0 0 10px rgba(231, 76, 60, 0.4);
+    animation: pulse-red-target 1s infinite;
+}
+
+@keyframes pulse-red-target {
+    0% { box-shadow: 0 0 10px rgba(231, 76, 60, 0.4); }
+    50% { box-shadow: 0 0 20px rgba(231, 76, 60, 0.7); }
+    100% { box-shadow: 0 0 10px rgba(231, 76, 60, 0.4); }
 }

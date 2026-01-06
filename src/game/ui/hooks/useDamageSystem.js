@@ -35,7 +35,7 @@ export function useDamageSystem(currentEvent) {
                     y
                 });
 
-                // 4. Таймер на видалення (синхронізовано з CSS анімацією - 1с)
+                // 4. Таймер на видалення (синхронізовано з CSS анімацією)
                 setTimeout(() => {
                     setIndicators(prev => prev.filter(i => i.id !== id));
                 }, 2000);
