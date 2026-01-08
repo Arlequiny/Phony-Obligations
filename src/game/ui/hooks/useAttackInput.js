@@ -1,37 +1,53 @@
-import { useState, useRef, useEffect } from "react";
-import { INTENTS, PHASES } from "../../../engine/types";
+import {useEffect, useRef, useState} from "react";
+import {INTENTS, PHASES} from "../../../engine/types";
+import {TRAIT_TYPES} from "../../../data/constants"; // 1. Імпорт типів
 
 export function useAttackInput({ gameState, dispatch, isAnimating }) {
     const [attackArrow, setAttackArrow] = useState(null);
     const [isValidTarget, setIsValidTarget] = useState(false);
 
-    // Використовуємо ref для даних, щоб уникнути closures в event listeners
     const dragDataRef = useRef(null);
 
     const canAttack = !isAnimating && gameState.phase === PHASES.BATTLE_PLAYER;
 
+    // --- 2. НОВА ФУНКЦІЯ ВАЛІДАЦІЇ ---
+    const checkTargetValidity = (targetCard) => {
+        if (!targetCard) return false;
+
+        // а) Збираємо всіх живих ворогів
+        const enemies = gameState.enemy.board.filter(c => c !== null);
+
+        // б) Чи є серед них танк/скло?
+        const hasTaunt = enemies.some(c =>
+            c.traits && c.traits.some(t => t.type === TRAIT_TYPES.TAUNT)
+        );
+        const hasStealth = targetCard.traits && targetCard.traits.some(t => t.type === TRAIT_TYPES.STEALTH);
+
+        // в) Логіка
+        if (hasTaunt) return targetCard.traits && targetCard.traits.some(t => t.type === TRAIT_TYPES.TAUNT);
+        if (hasStealth) return false;
+
+        // Якщо танків/скла немає - можна бити будь-кого
+        return true;
+    };
+    // ---------------------------------
+
     const onStartAttack = (e, card, slotIndex) => {
-        // 1. Блокуємо спливання і нативну поведінку
         e.stopPropagation();
-        // e.preventDefault(); // (Може блокувати скрол на мобільних, обережно)
 
-        if (!canAttack) {
-            console.log("Attack blocked: Wrong phase or animating");
-            return;
-        }
-        if (!card) return;
-        if (card.hasAttacked) {
-            console.log("Creature already attacked");
+        // 3. Перевірка: Неживі (INSENSATE) не можуть атакувати
+        const isInsensate = card.traits && card.traits.some(t => t.type === TRAIT_TYPES.INSENSATE);
+
+        if (!canAttack || !card || card.hasAttacked || isInsensate) {
+            console.log("Attack blocked: conditions not met");
             return;
         }
 
-        // 2. Отримуємо чіткі координати центру слота
-        // Важливо: e.currentTarget має бути тим елементом, на який ми повісили listener
         const rect = e.currentTarget.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
 
-        console.log("Attack Started from:", card.name, { x: centerX, y: centerY });
+        console.log("Attack Started from:", card.name);
 
         dragDataRef.current = {
             attackerInstanceId: card.instanceId,
@@ -52,7 +68,6 @@ export function useAttackInput({ gameState, dispatch, isAnimating }) {
             const dy = e.clientY - data.startY;
             const dist = Math.sqrt(dx * dx + dy * dy);
 
-            // Поріг чутливості 10px
             if (!data.hasMoved && dist > 10) {
                 data.hasMoved = true;
             }
@@ -65,14 +80,25 @@ export function useAttackInput({ gameState, dispatch, isAnimating }) {
                     toY: e.clientY
                 });
 
+                // --- 4. ОНОВЛЕНИЙ ПОШУК ЦІЛІ ---
                 const elements = document.elementsFromPoint(e.clientX, e.clientY);
+                const enemySlotDiv = elements.find(el => el.closest && el.closest('[data-slot-type="enemy"]'));
+                const slotElement = enemySlotDiv?.closest('[data-slot-type="enemy"]');
 
-                const enemySlot = elements.find(el => el.closest && el.closest('[data-slot-type="enemy"]'));
+                let valid = false;
 
-                const slotElement = enemySlot?.closest('[data-slot-type="enemy"]');
-                const cardId = slotElement?.getAttribute("data-card-id");
+                if (slotElement) {
+                    // Ми читаємо індекс слота, щоб знайти карту в state
+                    const slotIndex = parseInt(slotElement.getAttribute("data-slot-index"));
+                    const targetCard = gameState.enemy.board[slotIndex];
 
-                setIsValidTarget(!!cardId);
+                    // Перевіряємо валідність через нашу функцію
+                    if (targetCard) {
+                        valid = checkTargetValidity(targetCard);
+                    }
+                }
+
+                setIsValidTarget(valid);
             }
         };
 
@@ -84,25 +110,27 @@ export function useAttackInput({ gameState, dispatch, isAnimating }) {
             if (data.hasMoved) {
                 console.log("Attack released");
                 const elements = document.elementsFromPoint(e.clientX, e.clientY);
-                // Використовуємо .closest для надійності
-                const targetWrapper = elements.find(el => el.closest && el.closest('[data-slot-type="enemy"]'));
-                const targetEl = targetWrapper?.closest('[data-slot-type="enemy"]');
+                const enemySlotDiv = elements.find(el => el.closest && el.closest('[data-slot-type="enemy"]'));
+                const slotElement = enemySlotDiv?.closest('[data-slot-type="enemy"]');
 
-                if (targetEl) {
-                    const targetId = targetEl.getAttribute("data-card-id");
-                    console.log("Target found:", targetId);
+                if (slotElement) {
+                    const slotIndex = parseInt(slotElement.getAttribute("data-slot-index"));
+                    const targetCard = gameState.enemy.board[slotIndex];
+                    const targetId = slotElement.getAttribute("data-card-id"); // або targetCard.instanceId
 
-                    if (targetId) {
+                    // --- 5. ФІНАЛЬНА ВАЛІДАЦІЯ ПЕРЕД ВІДПРАВКОЮ ---
+                    if (targetCard && targetId && checkTargetValidity(targetCard)) {
                         dispatch({
                             type: INTENTS.ATTACK,
                             attackerInstanceId: data.attackerInstanceId,
                             defenderInstanceId: targetId
                         });
+                    } else {
+                        console.log("Attack blocked by TAUNT or Invalid Target");
                     }
                 }
             }
 
-            // Clean up
             dragDataRef.current = null;
             setAttackArrow(null);
             setIsValidTarget(false);
@@ -110,7 +138,6 @@ export function useAttackInput({ gameState, dispatch, isAnimating }) {
 
         window.addEventListener("pointermove", handleMove);
         window.addEventListener("pointerup", handleUp);
-        // Також слухаємо cancel/leave на випадок альт-табу
         window.addEventListener("pointercancel", handleUp);
 
         return () => {
@@ -118,7 +145,7 @@ export function useAttackInput({ gameState, dispatch, isAnimating }) {
             window.removeEventListener("pointerup", handleUp);
             window.removeEventListener("pointercancel", handleUp);
         };
-    }, [dispatch]);
+    }, [dispatch, gameState]); // gameState важливий, щоб бачити актуальний стіл
 
     return { attackArrow, isValidTarget, onStartAttack };
 }

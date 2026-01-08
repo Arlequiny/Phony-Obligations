@@ -1,5 +1,6 @@
-import {EVENTS} from "../types";
-import {KILL_REWARDS, RARITY} from "../../data/constants";
+import { EVENTS } from "../types";
+import { KILL_REWARDS, RARITY, TRAIT_TYPES } from "../../data/constants";
+import { resolveEffect } from "../systems/effectSystem";
 
 export function resolveAttack(initialState, { attackerInstanceId, defenderInstanceId }) {
     const transitions = [];
@@ -46,12 +47,34 @@ export function resolveAttack(initialState, { attackerInstanceId, defenderInstan
     const newDefender = applyDamage(defCard, damageToDefender);
     const newAttacker = applyDamage(attCard, damageToAttacker);
 
-    // Маркуємо атаку
-    newAttacker.hasAttacked = true;
+    // Знімаємо маскування, якщо було
+    let newAttackerTraits = [...newAttacker.traits];
+    const stealthIndex = newAttackerTraits.findIndex(t => t.type === TRAIT_TYPES.STEALTH);
+    if (stealthIndex !== -1) {
+        newAttackerTraits.splice(stealthIndex, 1);
+    }
+
+    // Уточнюємо подвійну атаку
+    const hasDoubleAttack = attCard.traits.some(t => t.type === TRAIT_TYPES.DOUBLE_ATTACK);
+    let attacksCount = attCard.attacksCount || 0;
+    attacksCount++;
+
+    let hasAttacked = true;
+    if (hasDoubleAttack && attacksCount < 2) {
+        hasAttacked = false;
+    }
+
+    // Оновлюємо атакуючого
+    const finalAttacker = {
+        ...newAttacker,
+        hasAttacked: hasAttacked,
+        attacksCount: attacksCount,
+        traits: newAttackerTraits
+    };
 
     // Оновлюємо стейт (ЖИВІ, АЛЕ ПОБИТІ)
     const stateAfterDamage = cloneStateWithUpdates(currentState, [
-        { owner: attackerLoc.owner, index: attackerLoc.index, card: newAttacker },
+        { owner: attackerLoc.owner, index: attackerLoc.index, card: finalAttacker },
         { owner: defenderLoc.owner, index: defenderLoc.index, card: newDefender }
     ]);
 
@@ -73,7 +96,7 @@ export function resolveAttack(initialState, { attackerInstanceId, defenderInstan
     const updatesForDeath = [];
 
     // Функція обробки смерті
-    const processDeath = (deadCardLoc, killerLoc) => {
+    const processDeath = (deadCardLoc) => {
         deaths.push({ owner: deadCardLoc.owner, index: deadCardLoc.index });
         updatesForDeath.push({ owner: deadCardLoc.owner, index: deadCardLoc.index, card: null });
 
@@ -92,7 +115,7 @@ export function resolveAttack(initialState, { attackerInstanceId, defenderInstan
     let moneyEarned = 0;
 
     // Перевірка смерті Атакуючого
-    if (newAttacker.currentStats.health <= 0) {
+    if (finalAttacker.currentStats.health <= 0) {
         moneyEarned += processDeath(attackerLoc, defenderLoc);
     }
 
@@ -104,17 +127,33 @@ export function resolveAttack(initialState, { attackerInstanceId, defenderInstan
     if (deaths.length > 0) {
         // Створюємо фінальний стейт з урахуванням смертей І грошей
         let stateAfterDeath = cloneStateWithUpdates(currentState, updatesForDeath);
+        let transitionsPayload = { deaths: [], effects: [] };
 
-        // Додаємо гроші
-        if (moneyEarned > 0) {
-            stateAfterDeath = {
-                ...stateAfterDeath,
-                player: {
-                    ...stateAfterDeath.player,
-                    money: stateAfterDeath.player.money + moneyEarned
-                }
-            };
-        }
+
+        deaths.forEach(death => {
+            // Нам треба знайти карту, ЯКА БУЛА перед смертю (з currentState, а не stateAfterDeath)
+            const deadCard = currentState[death.owner].board[death.index];
+
+            if (moneyEarned > 0) {
+                stateAfterDeath = {
+                    ...stateAfterDeath,
+                    player: {
+                        ...stateAfterDeath.player,
+                        money: stateAfterDeath.player.money + moneyEarned
+                    }
+                };
+            }
+
+            // Перевіряємо Deathrattle
+            const deathrattles = deadCard.traits.filter(t => t.type === TRAIT_TYPES.DEATHRATTLE);
+
+            deathrattles.forEach(effect => {
+                console.log("Triggering Deathrattle:", effect);
+                // Запускаємо ефект на стейті, де трупа ВЖЕ немає (stateAfterDeath)
+                stateAfterDeath = resolveEffect(stateAfterDeath, effect, deadCard, death.owner);
+            });
+        });
+
 
         // Запам'ятовуємо, що гравець втратив істоту (для Рятівного Деплою)
         const playerLostCreature = deaths.some(d => d.owner === "player");
@@ -139,22 +178,32 @@ export function resolveAttack(initialState, { attackerInstanceId, defenderInstan
 function applyDamage(card, amount) {
     // Працюємо виключно з currentStats
     const stats = { ...card.currentStats };
+    let newTraits = [...card.traits];
     let remainingDamage = amount;
 
-    // 1. Броня
+    const glassFrameIndex = newTraits.findIndex(t => t.type === TRAIT_TYPES.GLASS_FRAME);
+
+    // 2. Скло
+    if (glassFrameIndex !== -1 && amount > 0) {
+        newTraits.splice(glassFrameIndex, 1);
+        remainingDamage = 0;
+    }
+
+    // 2. Броня
     if (stats.armor > 0 && remainingDamage > 0) {
         const absorb = Math.min(stats.armor, remainingDamage);
         stats.armor -= absorb;
         remainingDamage -= absorb;
     }
 
-    // 2. Здоров'я
+    // 3. Здоров'я
     if (remainingDamage > 0) {
         stats.health = Math.max(0, stats.health - remainingDamage);
     }
 
     return {
         ...card,
+        traits: newTraits,
         currentStats: stats
     };
 }

@@ -1,7 +1,7 @@
-import { createInitialState } from "./core/GameState";
-import { resolveAttack } from "./actions/attack";
-import { resolveEndPhase } from "./actions/turnManager";
-import { checkGameOver } from "./systems/gameOver";
+import {createInitialState} from "./core/GameState";
+import {resolveAttack} from "./actions/attack";
+import {resolveEndPhase} from "./actions/turnManager";
+import {checkGameOver} from "./systems/gameOver";
 import {INTENTS, PHASES} from "./types";
 
 export class GameEngine {
@@ -68,13 +68,13 @@ export class GameEngine {
         // 1. Знайти карту в руці
         const cardIndex = player.hand.findIndex(c => c.instanceId === cardInstanceId);
         if (cardIndex === -1) {
-            console.error("Card not found in hand");
+            console.error("Card not found in hand.");
             return [];
         }
-        const card = player.hand[cardIndex];
+        const cardInHand = player.hand[cardIndex];
 
         // 2. Валідація (Гроші)
-        if (player.money < card.cost) {
+        if (player.money < cardInHand.cost) {
             console.log("Not enough money!");
             // Тут можна повернути івент { type: 'ERROR', message: 'No money' } для UI
             return [];
@@ -87,16 +87,21 @@ export class GameEngine {
         }
 
         // 4. Виконання (EXECUTION)
-        // Віднімаємо гроші
-        player.money -= card.cost;
 
-        // Видаляємо з руки
+        // а) Віднімаємо гроші
+        player.money -= cardInHand.cost;
+
+        // б) Видаляємо з руки
         player.hand.splice(cardIndex, 1);
 
-        // Ставимо на стіл
-        player.board[targetSlotIndex] = card;
+        // в) Створюємо "Живу Істоту" для столу та ставимо на стіл
+        player.board[targetSlotIndex] = {
+            ...cardInHand,                   // Копіюємо все з карти (ім'я, картинка, трейти)
+            currentStats: {...cardInHand.stats}, // Ініціалізуємо поточні статти (щоб здоров'я було повним)
+            hasAttacked: false,               // true = не може атакувати в хід виходу (якщо немає Ривка)
+            isJustDeployed: true             // <--- ОСЬ ТУТ ЦЕЙ ПРАПОРЕЦЬ
+        };
 
-        // Повертаємо транзакцію для оновлення UI (поки що просто пустий масив, бо стейт оновився)
         return [{ type: "DEPLOY_SUCCESS" }];
     }
 }

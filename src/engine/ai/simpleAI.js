@@ -1,40 +1,54 @@
-import { INTENTS } from "../types.js";
+import { INTENTS } from "../types";
+import { TRAIT_TYPES } from "../../data/constants"; // Імпорт констант
 
 export function computeEnemyTurn(state) {
     const intents = [];
     const { enemy, player } = state;
 
-    // 1. Знаходимо всіх ворогів, які можуть ходити (зліва направо)
-    enemy.board.forEach((attacker, attackerIndex) => {
-        if (!attacker) return; // Пустий слот
-        if (attacker.hasAttacked) return; // Вже ходив (хоча на початку ходу всі свіжі)
+    // 1. Аналіз столу гравця: Чи є Провокатори?
+    // Перевіряємо масив traits на наявність типу TAUNT
+    const tauntUnits = player.board.filter(unit =>
+        unit && unit.traits && unit.traits.some(t => t.type === TRAIT_TYPES.TAUNT)
+    );
 
-        // 2. Знаходимо валідні цілі у гравця
-        // (Тут пізніше додамо фільтр по Taunt)
-        const validTargets = [];
-        player.board.forEach((defender, defenderIndex) => {
-            if (defender) {
-                validTargets.push(defender);
-            }
-        });
+    const hasTaunt = tauntUnits.length > 0;
 
-        if (validTargets.length === 0) return; // Нема кого бити
+    // 2. Проходимо по істотах ворога
+    enemy.board.forEach((attacker) => {
+        if (!attacker) return;
+        if (attacker.hasAttacked) return;
 
-        // 3. Вибираємо випадкову ціль
-        const randomTarget = validTargets[Math.floor(Math.random() * validTargets.length)];
+        // Пропускаємо "Неживих" (INSENSATE) та з 0 атаки
+        if (attacker.traits.some(t => t.type === TRAIT_TYPES.INSENSATE)) return;
+        if (attacker.currentStats.attack <= 0) return;
 
-        // 4. Формуємо намір
+        // 3. Визначаємо пул валідних цілей
+        let validTargets = [];
+
+        if (hasTaunt) {
+            // Якщо є танк - б'ємо тільки танків
+            validTargets = tauntUnits;
+        } else {
+            // Якщо немає - б'ємо будь-кого живого, крім тих, хто в "Скритності" (STEALTH)
+            // (Скритність додамо пізніше, поки просто всіх живих)
+            validTargets = player.board.filter(u =>
+                u !== null &&
+                !u.traits.some(t => t.type === TRAIT_TYPES.STEALTH)
+            );
+        }
+
+        if (validTargets.length === 0) return;
+
+        // 4. Вибираємо ціль (поки що рандомно з доступних)
+        const target = validTargets[Math.floor(Math.random() * validTargets.length)];
+
         intents.push({
             type: INTENTS.ATTACK,
             attackerInstanceId: attacker.instanceId,
-            defenderInstanceId: randomTarget.instanceId
+            defenderInstanceId: target.instanceId
         });
     });
 
-    // 5. В кінці ворог завжди передає хід назад
-    intents.push({
-        type: INTENTS.END_PHASE
-    });
-
+    intents.push({ type: INTENTS.END_PHASE });
     return intents;
 }

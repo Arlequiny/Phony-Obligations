@@ -419,8 +419,8 @@
     font-variant-numeric: tabular-nums;
 }
 
- /*== technical shit ==*/
 
+ /*== technical shit ==*/
 .attacking-cursor {
     cursor: crosshair !important;
 }
@@ -462,20 +462,38 @@
     100% { box-shadow: 0 0 10px rgba(46, 204, 113, 0.4); }
 }
 
-/* ПІДСВІТКА ВОРОГА ПРИ НАВЕДЕННІ (Це вже працює через :hover у BoardSlot, але можна посилити) */
+
+/* targeting different shit */
 .board-slot:hover [data-slot-type="enemy"] .creature {
     box-shadow: 0 0 20px rgba(255, 87, 0, 1),
                 0 0 10px rgba(255, 87, 0, .75)!important;
 }
 
-/* СТАТИЧНА ЧЕРВОНА (коли тягнемо стрілку) - можна додати через JS клас на контейнер */
-.game-container.attacking-cursor [data-slot-type="enemy"] .creature {
-    box-shadow: 0 0 10px rgba(231, 76, 60, 0.4);
-    animation: pulse-red-target 1s infinite;
+/*!* СТАТИЧНА ЧЕРВОНА (коли тягнемо стрілку) - можна додати через JS клас на контейнер *!*/
+/*.game-container.attacking-cursor [data-slot-type="enemy"] .creature {*/
+/*    box-shadow: 0 0 10px rgba(231, 76, 60, 0.4);*/
+/*    animation: pulse-red-target 1s infinite;*/
+/*}*/
+
+/*@keyframes pulse-red-target {*/
+/*    0% { box-shadow: 0 0 10px rgba(231, 76, 60, 0.4); }*/
+/*    50% { box-shadow: 0 0 20px rgba(231, 76, 60, 0.7); }*/
+/*    100% { box-shadow: 0 0 10px rgba(231, 76, 60, 0.4); }*/
+/*}*/
+
+
+.highlight-target .creature {
+    box-shadow: 0 0 20px rgba(231, 76, 60, 0.9);
+    animation: pulse-red-target 0.8s infinite alternate;
+    z-index: 120;
+}
+
+.dimmed-target .creature {
+    filter: grayscale(80%) brightness(0.5);
+    opacity: 0.9;
 }
 
 @keyframes pulse-red-target {
-    0% { box-shadow: 0 0 10px rgba(231, 76, 60, 0.4); }
-    50% { box-shadow: 0 0 20px rgba(231, 76, 60, 0.7); }
-    100% { box-shadow: 0 0 10px rgba(231, 76, 60, 0.4); }
+    from { box-shadow: 0 0 10px rgba(231, 76, 60, 0.6); transform: scale(1); }
+    to { box-shadow: 0 0 25px rgba(231, 76, 60, 1); transform: scale(1.02); }
 }

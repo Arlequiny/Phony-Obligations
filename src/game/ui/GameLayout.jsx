@@ -5,6 +5,7 @@ import { useState } from "react";
 import { DraggableCard } from "./dnd/DraggableCard";
 import { DroppableSlot } from "./dnd/DroppableSlot";
 import { INTENTS, PHASES } from "../../engine/types.js";
+import { TRAIT_TYPES } from "../../data/constants";
 
 // hooks
 import { useAttackInput } from "./hooks/useAttackInput";
@@ -39,28 +40,38 @@ export default function GameLayout() {
 
     const isDeployPhase = state.phase === PHASES.DEPLOY_PLAYER;
     const isBattlePhase = state.phase === PHASES.BATTLE_PLAYER;
+    const hasEnemyTaunt = state.enemy.board.some(c =>
+        c && c.traits && c.traits.some(t => t.type === TRAIT_TYPES.TAUNT)
+    );
 
     // == end button logik ==
     const getEndButtonState = () => {
         if (isAnimating || state.phase === PHASES.BATTLE_ENEMY) {
             return { cls: "disabled", disabled: true };
         }
+
         if (isDeployPhase) {
             const hasCreatures = player.board.some(slot => slot !== null);
             return hasCreatures
                 ? { cls: "yellow", disabled: false }
                 : { cls: "disabled", disabled: true };
         }
+
         if (isBattlePhase) {
             const activeCreatures = player.board.filter(c => c !== null);
-            // Тут можна додати перевірку на "неживих" пізніше
-            const allAttacked = activeCreatures.every(c => c.hasAttacked);
+            const hasPendingActions = activeCreatures.some(c => {
+                const isInsensate = c.traits && c.traits.some(t => t.type === TRAIT_TYPES.INSENSATE);
+                const hasAttackPower = c.currentStats.attack > 0;
 
-            if (activeCreatures.length > 0 && allAttacked) {
+                return !c.hasAttacked && !isInsensate && hasAttackPower;
+            });
+
+            if (activeCreatures.length > 0 && !hasPendingActions) {
                 return { cls: "green", disabled: false };
             }
             return { cls: "yellow", disabled: false };
         }
+
         return { cls: "disabled", disabled: true };
     };
 
@@ -132,7 +143,7 @@ export default function GameLayout() {
 
                         <div className="turn-box">
                             <span className="label">TURN</span>
-                            <span className="value">{state.meta.playerDiedThisTurn ? "DEPLOY" : state.meta.turn}</span>
+                            <span className="value">{state.phase === PHASES.DEPLOY_PLAYER ? "DEPLOY" : state.meta.turn}</span>
                         </div>
 
                         <div className="divider" />
@@ -150,22 +161,41 @@ export default function GameLayout() {
 
                         {/* ENEMY FIELD */}
                         <div className="field_enemy board-row">
-                            {enemy.board.map((slot, index) => (
-                                <BoardSlot key={`enemy-${index}`}>
-                                    <div data-slot-type="enemy" data-card-id={slot?.instanceId}
-                                         data-slot-owner="enemy" data-slot-index={index}
-                                         style={{width: '100%', height: '100%', position: 'relative'}}
-                                    >
-                                        {slot && <Creature creature={slot} />}
-                                    </div>
-                                </BoardSlot>
-                            ))}
+                            {enemy.board.map((slot, index) => {
+                                const isTaunt = slot && slot.traits.some(t => t.type === TRAIT_TYPES.TAUNT);
+                                const isTargetable = slot && (hasEnemyTaunt ? isTaunt : true);
+
+                                const isStealth = slot && slot.traits.some(t => t.type === TRAIT_TYPES.STEALTH);
+
+                                let slotClass = "";
+                                if (attackArrow && slot) {
+                                    if (isStealth) slotClass = "";
+                                    else slotClass = isTargetable ? "highlight-target" : "dimmed-target";
+                                }
+
+                                return (
+                                    <BoardSlot key={`enemy-${index}`}>
+                                        <div
+                                            data-slot-type="enemy"
+                                            data-card-id={slot?.instanceId}
+                                            data-slot-owner="enemy"
+                                            data-slot-index={index}
+                                            className={slotClass}
+                                            style={{width: '100%', height: '100%', position: 'relative', transition: '0.3s'}}
+                                        >
+                                            {slot && <Creature creature={slot} />}
+                                        </div>
+                                    </BoardSlot>
+                                );
+                            })}
                         </div>
 
                         {/* PLAYER FIELD */}
                         <div className="field_user board-row">
                             {player.board.map((slot, index) => {
-                                const canAttack = isBattlePhase && slot && !slot.hasAttacked;
+                                const isInsensate = slot && slot.traits && slot.traits.some(t => t.type === TRAIT_TYPES.INSENSATE);
+                                const hasAttackPower = slot && slot.currentStats.attack > 0;
+                                const canAttack = isBattlePhase && slot && !slot.hasAttacked && !isInsensate && hasAttackPower;
 
                                 return (
                                     <div
@@ -185,7 +215,7 @@ export default function GameLayout() {
                                             )}
                                         </BoardSlot>
 
-                                        {isBattlePhase && slot && (
+                                        {canAttack && (
                                             <div
                                                 className="interactionLayer"
                                                 onPointerDown={(e) => onStartAttack(e, slot, index)}

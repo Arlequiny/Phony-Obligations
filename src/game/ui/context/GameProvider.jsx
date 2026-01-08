@@ -2,6 +2,8 @@ import { createContext, useContext, useState, useRef, useCallback, useEffect } f
 import { GameEngine } from "../../../engine/GameEngine";
 import { computeEnemyTurn } from "../../../engine/ai/simpleAI";
 import { EVENTS, INTENTS, PHASES } from "../../../engine/types";
+import { saveManager } from "../../../engine/systems/saveManager";
+import { getLevelById } from "../../../data/levels";
 
 const GameContext = createContext(null);
 
@@ -47,6 +49,18 @@ export function GameProvider({ children }) {
             }
 
             setCurrentEvent(t);
+
+            if (t.type === EVENTS.GAME_OVER) {
+                if (t.payload.result === "VICTORY") {
+                    const currentLevelId = engineRef.current.getState().meta.levelId;
+                    const levelConfig = getLevelById(currentLevelId);
+
+                    if (levelConfig) {
+                        console.log("Saving progress...");
+                        saveManager.completeLevel(currentLevelId, levelConfig.unlocks);
+                    }
+                }
+            }
 
             const delay = DELAYS[t.type] || 0;
             if (delay > 0) {

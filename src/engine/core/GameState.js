@@ -28,8 +28,8 @@ export function createInitialState(levelId) {
         meta: {
             levelId: level.id,
             turn: 1,
-            playerDiedThisTurn: true,
-            isGameOver: false
+            isGameOver: false,
+            gameResult: null
         },
         phase: PHASES.DEPLOY_PLAYER,
         player: {

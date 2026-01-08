@@ -25,7 +25,8 @@ export const EFFECT_ACTIONS = {
     SUMMON: "summon",
     BUFF_STATS: "buff_stats",
     DAMAGE: "damage",
-    HEAL: "heal"
+    HEAL: "heal",               // gives health but no more than the maximum
+    GLASSING: "glassing"        // gives glass frame
 };
 
 export const TARGET_TYPES = {

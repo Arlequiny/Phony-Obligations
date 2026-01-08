@@ -4,6 +4,17 @@
     font-weight: normal;
 }
 
+.creature.texture1,
+.creature.texture2,
+.creature.texture3 {
+    background-size: calc(16px * 8);
+    position: relative;
+}
+
+.creature.texture1 { background-image: url("/images/back_paper1.png"); }
+.creature.texture2 { background-image: url("/images/back_paper2.png"); }
+.creature.texture3 { background-image: url("/images/back_paper3.png"); }
+
 .creature {
     width: calc(16px * 8);
     height: calc(16px * 11);
@@ -11,13 +22,25 @@
     /*background: #d2b48c;*/
     /*border: 2px solid #7a5c3e;*/
     /*border-radius: 8px;*/
-    background-image: url("/images/back_paper1.png");
-    background-size: calc(16px * 8);
-    position: relative;
 
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.creature.taunt {
+    border-radius: 16px;
+    background-color: rgba(0,0,0, 0.3);
+    background-image: url("/images/back_paper_taunt.png");
+    background-size: calc(16px * 8);
+}
+
+.creature .glass-frame {
+    position: fixed;
+    width: calc(16px * 9);
+    height: calc(16px * 12);
+    background-image: url("/images/glass_frame.png");
+    background-size: calc(16px * 9);
 }
 
 .creature-image img {
@@ -27,6 +50,17 @@
     border: 3px ridge #333;
 
     object-fit: cover;
+}
+
+.stealth {
+    position: fixed;
+    width: calc(16px * 8);
+    height: calc(16px * 11);
+    background: radial-gradient(transparent 15%, rgba(34, 34, 34, 0.75), transparent);
+}
+
+.creature.taunt .creature-image {
+    padding-bottom: 12px;
 }
 
 .creature .stat {
@@ -94,4 +128,10 @@
     background-repeat: no-repeat;
 
     padding-left: 2px;
+}
+
+.creature .insensate-icon {
+    filter: contrast(1.2) hue-rotate(300deg);
+    bottom: -10px;
+    font-size: 28px;
 }

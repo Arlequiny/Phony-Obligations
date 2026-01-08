@@ -1,7 +1,7 @@
 import { RARITY, TRAIT_TYPES } from "./constants";
 import { EFFECT_ACTIONS, TARGET_TYPES } from "./constants";
 
-// Заклинаннями будуть аналоги карт таро.
+// Заклинаннями будуть аналоги карт таро - щоб розіграти потрібні умови на полі. Якщо будуть. Можливо.
 
 export const CARDS = [
     {
@@ -27,7 +27,7 @@ export const CARDS = [
     {
         id: "c_spirit_03",
         name: "Restless Spirit",
-        cost: 4,
+        cost: 3,
         rarity: RARITY.RARE,
         stats: { attack: 6, health: 6, armor: 0 },
         image: "/images/bio/spirit.png",
@@ -39,9 +39,9 @@ export const CARDS = [
     {
         id: "c_tower_04",
         name: "Water Tower",
-        cost: 2,
+        cost: 3,
         rarity: RARITY.COMMON,
-        stats: { attack: 1, health: 12, armor: 0 },
+        stats: { attack: 1, health: 8, armor: 0 },
         image: "/images/bio/water_tower.png",
         description: "Defend building, contains water.",
         traits: [
@@ -82,7 +82,7 @@ export const CARDS = [
         ]
     },
     {
-        id: "c_nerubian-egg_08",
+        id: "c_nerubian_egg_08",
         name: "Nerubian Egg",
         cost: 1,
         rarity: RARITY.RARE,
@@ -114,7 +114,7 @@ export const CARDS = [
         name: "Maduro Shieldmasta",
         cost: 3,
         rarity: RARITY.COMMON,
-        stats: { attack: 3, health: 5, armor: 1 },
+        stats: { attack: 3, health: 7, armor: 1 },
         image: "/images/bio/maduro.png",
         traits: [
             { type: TRAIT_TYPES.TAUNT },
@@ -123,9 +123,9 @@ export const CARDS = [
     {
         id: "c_onix_11",
         name: "Onix the Drago",
-        cost: 6,
+        cost: 5,
         rarity: RARITY.EPIC,
-        stats: { attack: 4, health: 9, armor: 2 },
+        stats: { attack: 3, health: 6, armor: 2 },
         image: "/images/bio/onix.png",
         description: "Legendary hero.",
         traits: [
@@ -146,8 +146,8 @@ export const CARDS = [
                 type: TRAIT_TYPES.BATTLECRY,
                 action: EFFECT_ACTIONS.BUFF_STATS,
                 payload: {
-                    attack: 1,
-                    health: 1,
+                    attack: 2,
+                    health: 2,
                     targetType: TARGET_TYPES.RANDOM_ALLY,
                     count: 2,           // Кількість цілей
                     excludeSelf: true   // Чи може бафнути сам себе? Зазвичай глечик бафає інших.
@@ -167,7 +167,7 @@ export const CARDS = [
     {
         id: "c_ember_14",
         name: "Glowing Ember",
-        cost: 2,
+        cost: 1,
         rarity: RARITY.COMMON,
         stats: { attack: 1, health: 1, armor: 0 },
         image: "/images/bio/ember.png",
@@ -177,9 +177,9 @@ export const CARDS = [
         ]
     },
     {
-        id: "c_Verminaard_14",
+        id: "c_Verminaard_15",
         name: "Verminaard",
-        cost: 6,
+        cost: 5,
         rarity: RARITY.EPIC,
         stats: { attack: 6, health: 9, armor: 2 },
         image: "/images/bio/verminaard.png",
@@ -189,13 +189,93 @@ export const CARDS = [
         ]
     },
     {
-        id: "c_barb_15",
+        id: "c_barb_16",
         name: "Vitya",
         cost: 4,
         rarity: RARITY.RARE,
         stats: { attack: 7, health: 4, armor: 0 },
         image: "/images/bio/barb.png",
         description: "Momma's best boy.",
+        traits: []
+    },
+    {
+        id: "c_croco_17",
+        name: "River Crocodile",
+        cost: 3,
+        rarity: RARITY.COMMON,
+        stats: { attack: 3, health: 6, armor: 1 },
+        image: "/images/bio/croco.png",
+        traits: []
+    },
+    {
+        id: "c_castle_cannon_18",
+        name: "Castle Cannon",
+        cost: 3,
+        rarity: RARITY.COMMON,
+        stats: { attack: 1, health: 5, armor: 1 },
+        image: "/images/bio/castle_cannon.png",
+        traits: [
+            {
+                type: TRAIT_TYPES.BATTLECRY,
+                action: EFFECT_ACTIONS.DAMAGE,
+                payload: {
+                    amount: 3,
+                    targetType: TARGET_TYPES.RANDOM_ENEMY,
+                    count: 1           // Кількість цілей
+                }
+            },
+            { type: TRAIT_TYPES.INSENSATE }
+        ]
+    },
+    {
+        id: "c_wild-bear_19",
+        name: "Wild Bear",
+        cost: 3,
+        rarity: RARITY.COMMON,
+        stats: { attack: 5, health: 5, armor: 0 },
+        image: "/images/bio/wild_bear.png",
+        traits: [
+            { type: TRAIT_TYPES.TAUNT }
+        ]
+    },
+    {
+        id: "c_frozen_elemental_20",
+        name: "Frozen Elemental",
+        cost: 3,
+        rarity: RARITY.RARE,
+        stats: { attack: 2, health: 6, armor: 0 },
+        image: "/images/bio/frozen_elemental.png",
+        description: "Always being frozen.",
+        traits: [
+            { type: TRAIT_TYPES.TAUNT },
+            { type: TRAIT_TYPES.INSENSATE }
+        ]
+    },
+    {
+        id: "c_old_turtle_21",
+        name: "Papa Turtle",
+        cost: 3,
+        rarity: RARITY.COMMON,
+        stats: { attack: 3, health: 4, armor: 1 },
+        image: "/images/bio/old_turtle.png",
+        traits: [
+            {
+                type: TRAIT_TYPES.BATTLECRY,
+                action: EFFECT_ACTIONS.SUMMON,
+                payload: {
+                    cardId: "c_young_turtle_22",
+                    count: 1
+                }
+            }
+        ]
+    },
+    {
+        id: "c_young_turtle_22",
+        name: "Baby Turtle",
+        cost: 1,
+        rarity: RARITY.COMMON,
+        stats: { attack: 1, health: 2, armor: 1 },
+        image: "/images/bio/young_turtle.png",
         traits: []
     },
 ];

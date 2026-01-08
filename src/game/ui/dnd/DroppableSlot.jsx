@@ -16,8 +16,9 @@ export function DroppableSlot({ index, children }) {
 
     const style={
         position: "absolute",
-        width: "8px",
-        height: "16px"
+        width: "4px",
+        height: "4px",
+        marginBottom: "64px"
     }
 
     return (
