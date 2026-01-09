@@ -341,14 +341,6 @@ export default function GameLayout() {
                 }}
             >
 
-                {state.phase === "GAME_OVER" && (
-                    <GameOverModal
-                        result={state.meta.gameResult}
-                        onRestart={() => startLevel(state.meta.levelId)}
-                        onMenu={exitLevel}
-                    />
-                )}
-
                 <div className={`game-container ${attackArrow ? "attacking-cursor" : ""}`} style={{ width: '100%', height: '100%' }}>
 
                     <header className="game-header">
@@ -529,6 +521,14 @@ export default function GameLayout() {
                     </div>
                 </div>
             </div>
+
+            {state.phase === "GAME_OVER" && (
+                <GameOverModal
+                    result={state.meta.gameResult}
+                    onRestart={() => startLevel(state.meta.levelId)}
+                    onMenu={exitLevel}
+                />
+            )}
 
             {showTooltip && hoverInfo?.type === 'board' && (
                 <BigCardTooltip card={hoverInfo.card} />
