@@ -15,18 +15,18 @@ export default function GameOverModal({ result, onRestart, onMenu }) {
                     {/*<img src={`${import.meta.env.BASE_URL}${imageSrc}`} alt={result} />*/}
                 </div>
 
-                <div className="result-content">
-                    {isVictory
-                        ? "Ви очистили цю землю від зла."
-                        : "Ваші герої полягли в бою."}
-                </div>
+                {/*<div className="result-content">*/}
+                {/*    {isVictory*/}
+                {/*        ? "Ви очистили цю землю від зла."*/}
+                {/*        : "Ваші герої полягли в бою."}*/}
+                {/*</div>*/}
 
                 <div className="button-group">
                     <button onClick={onRestart} className="btn-restart">
-                        Спробувати знову
+                        Restart
                     </button>
                     <button onClick={onMenu} className="btn-menu">
-                        В меню
+                        Menu
                     </button>
                 </div>
             </div>

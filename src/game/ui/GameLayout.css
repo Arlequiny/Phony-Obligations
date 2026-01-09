@@ -7,8 +7,15 @@
 
 
 .game-container {
-    min-height: 100vh;
+    position: relative;
+    width: 100%;
+    height: 100%;
+
     touch-action: none;
+    overflow: hidden;
+
+    border-bottom: 2px solid;
+    border-top: 2px solid;
 }
 
 /* == HEADER == */
@@ -128,7 +135,8 @@
     --bg: white;
 
     position: relative;
-    margin: 4vh 10vw 0;
+    margin: 4% auto 0;
+    width: 80%;
     outline: var(--border) solid var(--border-color);
     background: var(--bg);
 
@@ -175,8 +183,8 @@
 
 .bg-top,
 .bg-bottom {
-    width: 80vw;
-    height: 5vh;
+    width: 100%;
+    height: 40px;
     background-image: linear-gradient(to right, #dddddd 1px, transparent 1px);
     background-size: 48px;
 
@@ -192,8 +200,8 @@
 }
 
 .bg-center {
-    width: 80vw;
-    height: 70vh;
+    width: 100%;
+    height: 500px;
 
     display: flex;
     flex-direction: column;
@@ -235,7 +243,7 @@
             transparent 20px 40px
     ) 1;
 
-    padding-bottom: 5vh;
+    padding-bottom: 20px;
 }
 
 .board-row {
@@ -353,13 +361,18 @@
 /* == HAND == */
 
 .player-hand-container {
-    position: fixed;
+    position: absolute;
     left: 50%;
     bottom: 0;
     transform: translateX(-50%);
 
     z-index: 99;
     pointer-events: none;
+
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding-bottom: 10px;
 }
 
 .hand-cards {
@@ -381,8 +394,8 @@
 
 .money-display {
     position: absolute;
-    left: 1vw;
-    bottom: 15%;
+    left: 20px;
+    bottom: 140px;
 
     z-index: 99;
 
@@ -472,7 +485,7 @@
 }
 
 .attack-circle {
-    position: fixed;
+    position: absolute;
     width: 80px;
     height: 80px;
     background-image: url("/images/arrowcircle.png");

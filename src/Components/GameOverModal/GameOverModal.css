@@ -19,7 +19,12 @@
 }
 
 .game-over-card {
-    background: #2c3e50;
+    background: #707378;
+    background-image:
+            linear-gradient(to right, #3a4c60 1px, transparent 1px),
+            linear-gradient(to bottom, #3a4c60 1px, transparent 1px);
+    background-size: 32px 32px;
+
     padding: 40px;
     border-radius: 12px;
     text-align: center;
@@ -66,6 +71,8 @@
     display: flex;
     gap: 15px;
     justify-content: center;
+
+    margin-top: 24px;
 }
 
 .btn-restart,
@@ -77,8 +84,21 @@
     border-radius: 4px;
 }
 
-.btn-restart { background: #27ae60; color: white; }
-.btn-menu { background: #7f8c8d; color: white; }
+.btn-restart {
+    background: #e74c3c;
+    color: white;
+    box-shadow: 0 5px 0 #c0392b;
+}
+.btn-menu {
+    background: white;
+    color: #2c3e50;
+    box-shadow: 0 5px 0 #bdc3c7;
+}
+
+.btn-restart:hover { transform: translateY(-3px); box-shadow: 0 8px 0 #c0392b; }
+.btn-restart:active { transform: translateY(3px); box-shadow: 0 2px 0 #c0392b; }
+.btn-menu:hover { transform: translateY(-3px); box-shadow: 0 8px 0 #bdc3c7;}
+.btn-menu:active { transform: translateY(3px); box-shadow: 0 2px 0 #bdc3c7; }
 
 @keyframes fade-in {
     from { opacity: 0; }

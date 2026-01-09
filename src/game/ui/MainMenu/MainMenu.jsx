@@ -121,7 +121,7 @@ export default function MainMenu({ onStartLevel }) {
                                 <li style={{ marginBottom: '15px' }}>
                                     <strong style={{ color: '#e74c3c' }}>2. BATTLE PHASE (Player):</strong><br/>
                                     Your units are ready. Drag on your active unit, then drop on a target to attack.
-                                    Some units attack automatically.
+                                    Some units attack automatically. Killing grands money, that depends on rarity on killed minion.
                                 </li>
                                 <li>
                                     <strong style={{ color: '#95a5a6' }}>3. ENEMY PHASE:</strong><br/>
