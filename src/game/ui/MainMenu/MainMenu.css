@@ -76,10 +76,15 @@
 
 .game-title {
     margin: 0;
-    height: 450px;
-    width: 600px;
+
+    width: 100%;
+    max-width: 800px;
+    height: 45vh;
+
     background-image: url("/images/logo.png");
-    background-size: 600px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: left center;
 }
 
 .version-tag {

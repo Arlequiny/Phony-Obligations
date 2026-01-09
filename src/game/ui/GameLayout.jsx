@@ -333,7 +333,7 @@ export default function GameLayout() {
                     width: BASE_WIDTH,
                     height: BASE_HEIGHT,
                     transform: `scale(${scale})`,
-                    transformOrigin: 'top left', // Важливо!
+                    transformOrigin: 'top left',
                     position: 'absolute',
                     left: marginLeft,
                     top: marginTop,
