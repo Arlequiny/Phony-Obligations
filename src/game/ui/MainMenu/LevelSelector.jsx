@@ -5,7 +5,6 @@ import "./LevelSelector.css";
 export default function LevelSelector({ saveData, onStartLevel }) {
     // За замовчуванням вибираємо перший рівень або останній відкритий
     const [selectedId, setSelectedId] = useState(LEVELS[0].id);
-
     const selectedLevel = LEVELS.find(l => l.id === selectedId);
 
     // Отримуємо статистику для вибраного рівня
@@ -16,13 +15,18 @@ export default function LevelSelector({ saveData, onStartLevel }) {
     const index = LEVELS.findIndex(l => l.id === selectedId);
     const isUnlocked = index === 0 || (saveData.levels[LEVELS[index - 1].id]?.completed);
 
+    const formatTime = (totalSeconds) => {
+        if (!totalSeconds) return "--:--";
+        const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+        const s = (totalSeconds % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    };
+
     return (
         <div className="level-selector-container">
-            {/* ЛІВА КОЛОНКА */}
+
             <div className="ls-sidebar">
                 {LEVELS.map((level, idx) => {
-                    // ... map content ...
-                    // (код без змін, просто переконайся що він всередині ls-sidebar)
                     const lStats = saveData.levels[level.id] || {};
                     const lUnlocked = idx === 0 || (saveData.levels[LEVELS[idx - 1].id]?.completed);
                     return (
@@ -39,9 +43,7 @@ export default function LevelSelector({ saveData, onStartLevel }) {
                 })}
             </div>
 
-            {/* ПРАВА КОЛОНКА */}
             <div className="ls-details">
-                {/* СКРОЛ ЗОНА */}
                 <div className="ls-scroll-content">
                     <div className="ls-info-top">
                         <h1 className="ls-title">{selectedLevel.name}</h1>
@@ -75,13 +77,12 @@ export default function LevelSelector({ saveData, onStartLevel }) {
                             </div>
                             <div className="stat-row">
                                 <span className="stat-label">Best Time:</span>
-                                <span className="stat-value">--:--</span>
+                                <span className="stat-value">{formatTime(stats.bestTime)}</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* ФІКСОВАНИЙ ФУТЕР З КНОПКОЮ */}
                 <div className="ls-footer">
                     <button
                         className="btn-play-level"

@@ -10,7 +10,7 @@ const getTextureByUuid = (uuid) => {
     return TEXTURES[hash % TEXTURES.length];
 };
 
-export default function Creature({ creature }) {
+export default function Creature({ creature, isDying, isBuffed, isActivating }) {
     if (!creature) return null;
 
     const { attack, health, armor } = creature.currentStats;
@@ -23,7 +23,9 @@ export default function Creature({ creature }) {
     const isInsensate = traits.some(t => t.type === TRAIT_TYPES.INSENSATE);
     const hasGlassFrame = traits.some(t => t.type === TRAIT_TYPES.GLASS_FRAME);
     const isStealth = traits.some(t => t.type === TRAIT_TYPES.STEALTH);
-
+    const hasBattleCry = traits.some(t => t.type === TRAIT_TYPES.BATTLECRY);
+    const hasDeathrattle = traits.some(t => t.type === TRAIT_TYPES.DEATHRATTLE);
+    const hasDoubleAttack = traits.some(t => t.type === TRAIT_TYPES.DOUBLE_ATTACK);
 
     const getStatClass = (current, base) => {
         if (current > base) return "stat-buffed"; // Зелений
@@ -32,7 +34,11 @@ export default function Creature({ creature }) {
     };
 
     return (
-        <div className={`creature ${hasTaunt ? "taunt" : textureID}`}>
+        <div className={`creature ${hasTaunt ? "taunt" : textureID}
+            ${isDying ? "dying" : ""} 
+            ${isBuffed ? "buffed" : ""} 
+            ${isActivating ? "activating" : ""}
+        `}>
             <div className="creature-image">
                 <img src={`${import.meta.env.BASE_URL}${creature.image}`} alt={creature.name} />
             </div>
@@ -46,6 +52,9 @@ export default function Creature({ creature }) {
             )}
 
             {isInsensate && <div className="stat insensate-icon">💤</div>}
+            {hasBattleCry && <div className="stat ability-icon">⚔️</div>}
+            {hasDeathrattle && <div className="stat deathrattle-icon">☠️</div>}
+            {hasDoubleAttack && <div className="stat double-attack-icon"/>}
             {hasGlassFrame && <div className="glass-frame"/>}
         </div>
     );

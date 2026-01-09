@@ -146,8 +146,8 @@ export const CARDS = [
                 type: TRAIT_TYPES.BATTLECRY,
                 action: EFFECT_ACTIONS.BUFF_STATS,
                 payload: {
-                    attack: 2,
-                    health: 2,
+                    attack: 1,
+                    health: 1,
                     targetType: TARGET_TYPES.RANDOM_ALLY,
                     count: 2,           // Кількість цілей
                     excludeSelf: true   // Чи може бафнути сам себе? Зазвичай глечик бафає інших.
@@ -212,8 +212,9 @@ export const CARDS = [
         name: "Castle Cannon",
         cost: 3,
         rarity: RARITY.COMMON,
-        stats: { attack: 1, health: 5, armor: 1 },
+        stats: { attack: 1, health: 5, armor: 0 },
         image: "/images/bio/castle_cannon.png",
+        projectileType: "cannonball",
         traits: [
             {
                 type: TRAIT_TYPES.BATTLECRY,

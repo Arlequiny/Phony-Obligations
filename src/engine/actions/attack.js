@@ -97,8 +97,17 @@ export function resolveAttack(initialState, { attackerInstanceId, defenderInstan
 
     // Функція обробки смерті
     const processDeath = (deadCardLoc) => {
-        deaths.push({ owner: deadCardLoc.owner, index: deadCardLoc.index });
-        updatesForDeath.push({ owner: deadCardLoc.owner, index: deadCardLoc.index, card: null });
+        const hasDeathrattle = deadCardLoc.card.traits.some(t => t.type === TRAIT_TYPES.DEATHRATTLE);
+        deaths.push({
+            owner: deadCardLoc.owner,
+            index: deadCardLoc.index,
+            hasDeathrattle: hasDeathrattle
+        });
+        updatesForDeath.push({
+            owner: deadCardLoc.owner,
+            index: deadCardLoc.index,
+            card: null
+        });
 
         // НАРАХУВАННЯ ГРОШЕЙ
         // Якщо вбив гравець (killer.owner === 'player') - даємо гроші
@@ -150,7 +159,8 @@ export function resolveAttack(initialState, { attackerInstanceId, defenderInstan
             deathrattles.forEach(effect => {
                 console.log("Triggering Deathrattle:", effect);
                 // Запускаємо ефект на стейті, де трупа ВЖЕ немає (stateAfterDeath)
-                stateAfterDeath = resolveEffect(stateAfterDeath, effect, deadCard, death.owner);
+                const res = resolveEffect(stateAfterDeath, effect, deadCard, death.owner);
+                stateAfterDeath = res.newState;
             });
         });
 
@@ -163,11 +173,23 @@ export function resolveAttack(initialState, { attackerInstanceId, defenderInstan
 
         transitions.push({
             type: EVENTS.DEATH_PROCESS,
-            state: stateAfterDeath,
+            // state: stateAfterDeath,
             payload: { deaths, moneyEarned } // Передаємо інфо про смерть
         });
 
         currentState = stateAfterDeath;
+    }
+
+    const gameResult = checkSmartGameOver(currentState);
+
+    if (gameResult) {
+        currentState.phase = "GAME_OVER";
+        currentState.meta.gameResult = gameResult;
+        transitions.push({
+            type: "GAME_OVER",
+            state: currentState,
+            payload: { result: gameResult }
+        });
     }
 
     return { finalState: currentState, transitions };
@@ -220,4 +242,26 @@ function cloneStateWithUpdates(state, updates) {
     });
 
     return newState;
+}
+
+function checkSmartGameOver(state) {
+    const enemyUnits = state.enemy.board.filter(c => c !== null);
+    if (enemyUnits.length === 0) {
+        return "VICTORY";
+    }
+
+    const playerUnits = state.player.board.filter(c => c !== null);
+
+    if (playerUnits.length === 0) {
+        const hand = state.player.hand;
+        const money = state.player.money;
+
+        const canDeployAnything = hand.some(card => card.cost <= money);
+
+        if (!canDeployAnything) {
+            return "DEFEAT";
+        }
+    }
+
+    return null;
 }

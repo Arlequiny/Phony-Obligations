@@ -1,11 +1,12 @@
 import { useGame } from "./context/GameProvider";
-import { DndContext, DragOverlay } from "@dnd-kit/core";
-import { useState } from "react";
+import { DndContext, DragOverlay, useSensor, useSensors, MouseSensor, TouchSensor } from "@dnd-kit/core";
+import { useState, useRef, useEffect } from "react";
 
 import { DraggableCard } from "./dnd/DraggableCard";
 import { DroppableSlot } from "./dnd/DroppableSlot";
-import { INTENTS, PHASES } from "../../engine/types.js";
+import { INTENTS, PHASES, EVENTS } from "../../engine/types.js";
 import { TRAIT_TYPES } from "../../data/constants";
+import { saveManager } from "../../engine/systems/saveManager";
 
 // hooks
 import { useAttackInput } from "./hooks/useAttackInput";
@@ -20,11 +21,149 @@ import AttackArrow from "../../Components/AttackArrow/AttackArrow";
 import PhaseBanner from "../../Components/PhaseBanner/PhaseBanner";
 import DamageIndicator from "../../Components/DamageIndicator/DamageIndicator";
 import GameOverModal from "../../Components/GameOverModal/GameOverModal";
+import VFXLayer from "./vfx/VFXLayer";
+import TraitList from "./Tooltip/TraitList";
+import BigCardTooltip from "./Tooltip/BigCardTooltip";
 import "./GameLayout.css";
 
 export default function GameLayout() {
     const { state, exitLevel, startLevel, dispatch, isAnimating, currentEvent } = useGame();
     const [activeDragItem, setActiveDragItem] = useState(null);
+
+    const sensors = useSensors(
+        useSensor(MouseSensor, {
+            activationConstraint: {
+                distance: 5,
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 0,
+                tolerance: 5,
+                distance: 15,
+            },
+        })
+    );
+
+    // money animation
+    const [moneyAnimClass, setMoneyAnimClass] = useState("");
+    const prevMoneyRef = useRef(state?.player?.money);
+
+    useEffect(() => {
+        if (!state || !state.player) return;
+
+        const currentMoney = state.player.money;
+        const prevMoney = prevMoneyRef.current;
+
+        if (currentMoney !== prevMoney) {
+            if (currentMoney > prevMoney) {
+                setMoneyAnimClass("anim-gain");
+            } else if (currentMoney < prevMoney) {
+                setMoneyAnimClass("anim-spend");
+            }
+
+            prevMoneyRef.current = currentMoney;
+            const timer = setTimeout(() => {
+                setMoneyAnimClass("");
+            }, 500);
+
+            return () => clearTimeout(timer);
+        }
+    }, [state?.player?.money]);
+
+
+    // == card tooltips ==
+    const [hoverInfo, setHoverInfo] = useState(null);
+    const [showTooltip, setShowTooltip] = useState(false);
+    const hoverTimerRef = useRef(null);
+
+    const handleMouseEnter = (card, type, e) => {
+        if (attackArrow) return;
+        if (!card) return;
+
+        const target = e.currentTarget;
+
+        if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+
+        hoverTimerRef.current = setTimeout(() => {
+            const rect = target.getBoundingClientRect();
+            setHoverInfo({
+                type,
+                card,
+                x: rect.right + 64,
+                y: rect.top
+            });
+            setShowTooltip(true);
+        }, type === 'hand' ? 500 : 800);
+    };
+
+    const handlePointerDown = (card, type, e) => {
+        if (attackArrow) return;
+        if (!card) return;
+        if (e.pointerType === 'mouse') return;
+
+        const targetElement = e.currentTarget;
+        if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+
+        hoverTimerRef.current = setTimeout(() => {
+            const rect = targetElement.getBoundingClientRect();
+
+            setHoverInfo({
+                type,
+                card,
+                x: rect.right + 64,
+                y: rect.top
+            });
+
+            setShowTooltip(true);
+        }, 400);
+    };
+
+    const handleInteractionEnd = () => {
+        if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+        setShowTooltip(false);
+        setHoverInfo(null);
+    };
+
+
+    // == timer ==
+    const [seconds, setSeconds] = useState(0);
+    const battleTimerRef = useRef(null);
+
+    useEffect(() => {
+        // const isFirstDeploy = state.meta.turn === 1 && state.phase === PHASES.DEPLOY_PLAYER;
+        const isGameOver = state.phase === "GAME_OVER";
+
+        // const shouldRun = !isFirstDeploy && !isGameOver;
+        const shouldRun =  !isGameOver;
+
+        if (shouldRun) {
+            battleTimerRef.current = setInterval(() => {
+                setSeconds(s => s + 1);
+            }, 1000);
+        } else {
+            clearInterval(battleTimerRef.current);
+        }
+
+        return () => clearInterval(battleTimerRef.current);
+    }, [state.phase, state.meta.turn]);
+
+    useEffect(() => {
+        if (state.phase === "GAME_OVER" && state.meta.gameResult === "VICTORY") {
+            console.log("Saving Best Time:", seconds);
+            saveManager.completeLevel(state.meta.levelId, null, { time: seconds });
+        }
+    }, [state.phase, state.meta.gameResult, state.meta.levelId]);
+
+    const formatTime = (totalSeconds) => {
+        const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+        const s = (totalSeconds % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    };
+
+
+    // == vfx and animations ==
+    const vfxRef = useRef(null);
 
     const { attackArrow, isValidTarget, onStartAttack } = useAttackInput({
         gameState: state,
@@ -35,6 +174,52 @@ export default function GameLayout() {
     useCreatureAnimation(currentEvent);
     const damageIndicators = useDamageSystem(currentEvent);
 
+    useEffect(() => {
+        if (!currentEvent) return;
+        if (currentEvent.type === EVENTS.DEATH_PROCESS) {
+            const { deaths } = currentEvent.payload;
+            deaths.forEach(death => {
+                if (death.hasDeathrattle) {
+                    const el = document.querySelector(
+                        `div[data-slot-owner="${death.owner}"][data-slot-index="${death.index}"] .creature`
+                    );
+
+                    if (el && vfxRef.current) {
+                        const rect = el.getBoundingClientRect();
+                        vfxRef.current.spawnSkull(rect);
+                    }
+                }
+            });
+        }
+        if (currentEvent.type === EVENTS.PROJECTILE_FIRED) {
+            const { source, targets, variant } = currentEvent.payload;
+
+            // Знаходимо того, хто стріляє
+            const sourceEl = document.querySelector(
+                `div[data-slot-owner="${source.owner}"][data-slot-index="${source.index}"] .creature`
+            );
+
+            if (sourceEl && vfxRef.current) {
+                const sourceRect = sourceEl.getBoundingClientRect();
+
+                // Запускаємо снаряд у кожну ціль
+                targets.forEach(target => {
+                    const targetEl = document.querySelector(
+                        `div[data-slot-owner="${target.owner}"][data-slot-index="${target.index}"] .creature`
+                    );
+
+                    if (targetEl) {
+                        const targetRect = targetEl.getBoundingClientRect();
+                        // ПУСК!
+                        vfxRef.current.spawnProjectile(sourceRect, targetRect, variant);
+                    }
+                });
+            }
+        }
+    }, [currentEvent]);
+
+
+    // loading and phase check
     if (!state) return <div>Loading...</div>;
     const { player, enemy } = state;
 
@@ -43,6 +228,7 @@ export default function GameLayout() {
     const hasEnemyTaunt = state.enemy.board.some(c =>
         c && c.traits && c.traits.some(t => t.type === TRAIT_TYPES.TAUNT)
     );
+
 
     // == end button logik ==
     const getEndButtonState = () => {
@@ -77,8 +263,10 @@ export default function GameLayout() {
 
     const btnState = getEndButtonState();
 
+
     // == DND HANDLERS ==
     const handleDragStart = (event) => {
+        handleInteractionEnd();
         if (event.active.data.current?.type === "hand-card") {
             setActiveDragItem(event.active.data.current.card);
         }
@@ -98,8 +286,21 @@ export default function GameLayout() {
         }
     };
 
+
     return (
-        <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} autoScroll={false}>
+        <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd} autoScroll={false}>
+
+            {showTooltip && hoverInfo?.type === 'board' && (
+                <BigCardTooltip card={hoverInfo.card} />
+            )}
+
+            {showTooltip && hoverInfo?.type === 'hand' && (
+                <div style={{ position: 'fixed', top: hoverInfo.y, left: hoverInfo.x, zIndex: 9999 }}>
+                    <TraitList traits={hoverInfo.card.traits} />
+                </div>
+            )}
+
+            <VFXLayer ref={vfxRef} />
             <PhaseBanner />
 
             {damageIndicators.map(ind => (
@@ -148,7 +349,7 @@ export default function GameLayout() {
 
                         <div className="divider" />
                         <div className="timer-box">
-                            <span className="value">12:34</span>
+                            <span className="value">{formatTime(seconds)}</span>
                         </div>
 
                     </div>
@@ -164,7 +365,6 @@ export default function GameLayout() {
                             {enemy.board.map((slot, index) => {
                                 const isTaunt = slot && slot.traits.some(t => t.type === TRAIT_TYPES.TAUNT);
                                 const isTargetable = slot && (hasEnemyTaunt ? isTaunt : true);
-
                                 const isStealth = slot && slot.traits.some(t => t.type === TRAIT_TYPES.STEALTH);
 
                                 let slotClass = "";
@@ -172,6 +372,16 @@ export default function GameLayout() {
                                     if (isStealth) slotClass = "";
                                     else slotClass = isTargetable ? "highlight-target" : "dimmed-target";
                                 }
+
+                                const isDying = currentEvent?.type === EVENTS.DEATH_PROCESS &&
+                                    currentEvent.payload.deaths.some(d => d.owner === "enemy" && d.index === index);
+
+                                const isActivating = currentEvent?.type === EVENTS.ABILITY_TRIGGER &&
+                                    currentEvent.payload.owner === "enemy" &&
+                                    currentEvent.payload.index === index;
+
+                                const isBuffed = currentEvent?.type === EVENTS.BUFF_APPLIED &&
+                                    currentEvent.payload.targets.some(t => t.owner === "enemy" && t.index === index);
 
                                 return (
                                     <BoardSlot key={`enemy-${index}`}>
@@ -182,8 +392,16 @@ export default function GameLayout() {
                                             data-slot-index={index}
                                             className={slotClass}
                                             style={{width: '100%', height: '100%', position: 'relative', transition: '0.3s'}}
+
+                                            onMouseEnter={(e) => slot && handleMouseEnter(slot, 'board', e)}
+                                            onMouseLeave={handleInteractionEnd}
+
+                                            onPointerDown={(e) => slot && handlePointerDown(slot, 'board', e)}
+                                            onPointerUp={handleInteractionEnd}
+                                            onPointerLeave={handleInteractionEnd}
+                                            onPointerCancel={handleInteractionEnd}
                                         >
-                                            {slot && <Creature creature={slot} />}
+                                            {slot && <Creature creature={slot} isDying={isDying} isActivating={isActivating} isBuffed={isBuffed} />}
                                         </div>
                                     </BoardSlot>
                                 );
@@ -197,6 +415,16 @@ export default function GameLayout() {
                                 const hasAttackPower = slot && slot.currentStats.attack > 0;
                                 const canAttack = isBattlePhase && slot && !slot.hasAttacked && !isInsensate && hasAttackPower;
 
+                                const isDying = currentEvent?.type === EVENTS.DEATH_PROCESS &&
+                                    currentEvent.payload.deaths.some(d => d.owner === "player" && d.index === index);
+
+                                const isActivating = currentEvent?.type === EVENTS.ABILITY_TRIGGER &&
+                                    currentEvent.payload.owner === "player" &&
+                                    currentEvent.payload.index === index;
+
+                                const isBuffed = currentEvent?.type === EVENTS.BUFF_APPLIED &&
+                                    currentEvent.payload.targets.some(t => t.owner === "player" && t.index === index);
+
                                 return (
                                     <div
                                         key={`player-${index}`}
@@ -204,6 +432,14 @@ export default function GameLayout() {
                                         data-slot-owner="player"
                                         data-slot-index={index}
                                         className={canAttack ? "slot-active-creature" : ""}
+
+                                        onMouseEnter={(e) => slot && handleMouseEnter(slot, 'board', e)}
+                                        onMouseLeave={handleInteractionEnd}
+
+                                        onPointerDown={(e) => slot && handlePointerDown(slot, 'board', e)}
+                                        onPointerUp={handleInteractionEnd}
+                                        onPointerLeave={handleInteractionEnd}
+                                        onPointerCancel={handleInteractionEnd}
                                     >
                                         <BoardSlot>
                                             {isDeployPhase ? (
@@ -211,7 +447,7 @@ export default function GameLayout() {
                                                     {slot && <Creature creature={slot} />}
                                                 </DroppableSlot>
                                             ) : (
-                                                slot && <Creature creature={slot} />
+                                                slot && <Creature creature={slot} isDying={isDying} isActivating={isActivating} isBuffed={isBuffed} />
                                             )}
                                         </BoardSlot>
 
@@ -240,23 +476,37 @@ export default function GameLayout() {
                     <span className="side-thing diamond" />
                 </div>
 
-                <div className="money-display">
+                <div className={`money-display ${moneyAnimClass}`}>
                     <span className="money-icon" />
                     <span className="money-value">{player.money}</span>
                 </div>
 
                 <div className="player-hand-container">
-                    <div className="hand-cards">
+                    <div className={`hand-cards ${attackArrow ? "hand-dimmed" : ""}`}>
                         {player.hand.map((card) => (
-                            isDeployPhase ? (
-                                <DraggableCard key={card.instanceId} card={card}>
-                                    <HandCard card={card} />
-                                </DraggableCard>
-                            ) : (
-                                <div key={card.instanceId} className="disabled-card">
-                                    <HandCard card={card} />
-                                </div>
-                            )
+                            <div
+                                key={card.instanceId}
+
+                                onMouseEnter={(e) => handleMouseEnter(card, 'hand', e)}
+                                onMouseLeave={handleInteractionEnd}
+
+                                onPointerDown={(e) => handlePointerDown(card, 'hand', e)}
+                                onPointerUp={handleInteractionEnd}
+                                onPointerLeave={handleInteractionEnd}
+                                onPointerCancel={handleInteractionEnd}
+                            >
+
+                                {isDeployPhase ? (
+                                    <DraggableCard key={card.instanceId} card={card}>
+                                        <HandCard card={card} />
+                                    </DraggableCard>
+                                ) : (
+                                    <div key={card.instanceId} className="disabled-card">
+                                        <HandCard card={card} />
+                                    </div>
+                                )}
+
+                            </div>
                         ))}
                     </div>
                 </div>

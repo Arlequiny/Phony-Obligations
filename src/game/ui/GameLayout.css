@@ -8,6 +8,7 @@
 
 .game-container {
     min-height: 100vh;
+    touch-action: none;
 }
 
 /* == HEADER == */
@@ -367,6 +368,15 @@
     gap: 14px;
 
     pointer-events: auto;
+
+    transition: transform 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
+}
+
+.hand-cards.hand-dimmed {
+    transform: translateY(64px);
+    opacity: 0.3;
+    filter: grayscale(100%);
+    pointer-events: none;
 }
 
 .money-display {
@@ -387,6 +397,7 @@
 
     font-family: Carnevalee Freakshow, serif;
     font-size: 32px;
+    color: #2b1e0f;
 
     background: #c9b28a;
     border: 2px solid #5e4a2f;
@@ -396,7 +407,7 @@
             0 4px 0 #5e4a2f,
             0 0 12px rgba(0, 0, 0, 0.3);
 
-    color: #2b1e0f;
+    overflow: hidden
 }
 
 .money-icon {
@@ -406,8 +417,11 @@
     height: 32px;
 
     background-image: url("/images/money.png");
-    background-size: contain;
-    background-repeat: no-repeat;
+    background-size: 32px;
+    background-repeat: repeat-y;
+
+    display: inline-block;
+    transition: filter 0.3s;
 
     filter: brightness(1.2);
 }
@@ -417,8 +431,36 @@
     padding-right: 6px;
 
     font-variant-numeric: tabular-nums;
+    transition: color 0.3s ease;
 }
 
+.money-display.anim-gain .money-icon {
+    animation: coin-scroll-up 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+    filter: brightness(1.3);
+}
+
+.money-display.anim-gain .money-value {
+    color: #2ecc71;
+}
+
+@keyframes coin-scroll-up {
+    0% { background-position-y: 0px; }
+    100% { background-position-y: -32px; }
+}
+
+.money-display.anim-spend .money-icon {
+    animation: coin-scroll-down 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+    filter: brightness(0.8);
+}
+
+.money-display.anim-spend .money-value {
+    color: #e74c3c;
+}
+
+@keyframes coin-scroll-down {
+    0% { background-position-y: 0px; }
+    100% { background-position-y: 32px; }
+}
 
  /*== technical shit ==*/
 .attacking-cursor {

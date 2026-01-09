@@ -1,4 +1,4 @@
-import { TRAIT_TYPES } from "../../data/constants"; // Перевір шляхи до constants
+import { EFFECT_ACTIONS, TRAIT_TYPES} from "../../data/constants"; // Перевір шляхи до constants
 import { EVENTS, PHASES } from "../types.js";
 import { resolveEffect } from "../systems/effectSystem";
 
@@ -23,7 +23,7 @@ export function resolveEndPhase(state) {
             if (state.meta.playerDiedThisTurn) {
                 nextPhase = PHASES.DEPLOY_PLAYER;
             } else {
-                nextPhase = PHASES.DEPLOY_PLAYER;
+                nextPhase = PHASES.DEPLOY_PLAYER;     // hard mode nextPhase = PHASES.BATTLE_PLAYER;
                 nextTurn += 1;
             }
             resetAttacks = true;
@@ -81,15 +81,50 @@ export function resolveEndPhase(state) {
             cleanCard.isJustDeployed = undefined;
             delete cleanCard.isJustDeployed;
             newState[activeOwner].board[index] = cleanCard;
-            return; // Пропускаємо цей цикл
+            return;
         }
 
         // Якщо карта "стара" - запускаємо ефект
         const battlecries = card.traits.filter(t => t.type === TRAIT_TYPES.BATTLECRY);
-        battlecries.forEach(effect => {
-            // Важливо: передаємо newState і отримуємо оновлений newState
-            newState = resolveEffect(newState, effect, card, activeOwner);
-        });
+        if (battlecries.length > 0) {
+            // 1. Сповіщаємо UI, що ця карта щось чаклує
+            transitions.push({
+                type: EVENTS.ABILITY_TRIGGER,
+                state: cloneState(newState),
+                payload: { owner: activeOwner, index: index }
+            });
+
+            // 2. Виконуємо ефекти
+            battlecries.forEach(effect => {
+                const result = resolveEffect(newState, effect, card, activeOwner);
+                newState = result.newState;
+
+                if (result.affectedTargets.length > 0 && effect.action === EFFECT_ACTIONS.BUFF_STATS) {
+                    transitions.push({
+                        type: EVENTS.BUFF_APPLIED,
+                        state: cloneState(newState), // Показуємо вже оновлені цифри (зелені)
+                        payload: { targets: result.affectedTargets }
+                    });
+                }
+
+                if (result.affectedTargets.length > 0 && effect.action === EFFECT_ACTIONS.DAMAGE) {
+                    // Перевіряємо, чи має карта снаряд (читаємо з конфігу або самої карти)
+                    const projType = card.projectileType;
+
+                    if (projType) {
+                        transitions.push({
+                            type: EVENTS.PROJECTILE_FIRED,
+                            // Тут state не потрібен, бо снаряд не змінює цифри, він просто летить
+                            payload: {
+                                source: { owner: activeOwner, index: index }, // Хто стріляє
+                                targets: result.affectedTargets,              // В кого
+                                variant: projType                             // "cannonball"
+                            }
+                        });
+                    }
+                }
+            });
+        }
     });
 
     // --- 3. РОЗРАХУНОК НАСЛІДКІВ (Шкода та Хрипи) ---
@@ -141,16 +176,18 @@ export function resolveEndPhase(state) {
             stateAfterDeath[u.owner].board[u.index] = null;
         });
 
-        // 2. ЗАПУСКАЄМО DEATHRATTLE (Ось чого не вистачало!)
+        // 2. ЗАПУСКАЄМО DEATHRATTLE
         deaths.forEach(death => {
             // Беремо карту з newState (де вона ще є), щоб прочитати трейти
             const deadCard = newState[death.owner].board[death.index];
 
+            death.hasDeathrattle = deadCard.traits.some(t => t.type === TRAIT_TYPES.DEATHRATTLE);
+
             const deathrattles = deadCard.traits.filter(t => t.type === TRAIT_TYPES.DEATHRATTLE);
             deathrattles.forEach(effect => {
-                console.log("Triggering Turn-End Deathrattle:", effect);
-                // Застосовуємо ефект до "чистого" столу
-                stateAfterDeath = resolveEffect(stateAfterDeath, effect, deadCard, death.owner);
+                const res = resolveEffect(stateAfterDeath, effect, deadCard, death.owner);
+                stateAfterDeath = res.newState;
+                // Тут поки ігноруємо targets для хрипів, або можна теж додати події
             });
         });
 
@@ -161,7 +198,7 @@ export function resolveEndPhase(state) {
 
         transitions.push({
             type: EVENTS.DEATH_PROCESS,
-            state: stateAfterDeath,
+            // state: stateAfterDeath,
             payload: { deaths }
         });
 
@@ -175,13 +212,61 @@ export function resolveEndPhase(state) {
         payload: { phase: nextPhase, turn: nextTurn }
     });
 
+
+    // ГЕЙМ ОВЕР
+    const gameResult = checkSmartGameOver(newState);
+
+    if (gameResult) {
+        // Якщо гра закінчилась, перебиваємо фазу
+        newState.phase = PHASES.GAME_OVER;
+        newState.meta.gameResult = gameResult;
+
+        transitions.push({
+            type: EVENTS.GAME_OVER,
+            state: newState, // Тут стейт потрібен, щоб UI показав фінал
+            payload: { result: gameResult }
+        });
+
+        // Повертаємо результат, щоб не додавати TRANSITION_PHASE
+        return { finalState: newState, transitions };
+    }
+
+    // Якщо гра не закінчилась - звичайний перехід фази
+    transitions.push({
+        type: EVENTS.TRANSITION_PHASE,
+        state: newState,
+        payload: { phase: nextPhase, turn: nextTurn }
+    });
+
     return { finalState: newState, transitions };
 }
 
 function cloneState(state) {
     return {
         ...state,
-        player: { ...state.player, board: [...state.player.board] },
+        player: { ...state.player, board: [...state.player.board], hand: [...state.player.hand] },
         enemy: { ...state.enemy, board: [...state.enemy.board] }
     };
+}
+
+function checkSmartGameOver(state) {
+    const enemyUnits = state.enemy.board.filter(c => c !== null);
+    if (enemyUnits.length === 0) {
+        return "VICTORY";
+    }
+
+    const playerUnits = state.player.board.filter(c => c !== null);
+
+    if (playerUnits.length === 0) {
+        const hand = state.player.hand;
+        const money = state.player.money;
+
+        const canDeployAnything = hand.some(card => card.cost <= money);
+
+        if (!canDeployAnything) {
+            return "DEFEAT";
+        }
+    }
+
+    return null;
 }

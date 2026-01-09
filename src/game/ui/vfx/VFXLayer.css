@@ -1,0 +1,60 @@
+.vfx-layer {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    pointer-events: none; /* Пропускає кліки */
+    z-index: 8000;
+    overflow: hidden;
+}
+
+.vfx-item {
+    position: absolute;
+    transform-origin: center;
+}
+
+/* --- СНАРЯД (Гарматне ядро) --- */
+.vfx-projectile.cannonball {
+    width: 20px;
+    height: 20px;
+    background: radial-gradient(circle at 30% 30%, #555, #000);
+    border-radius: 50%;
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    /* Анімація польоту */
+    animation: fly-straight 0.25s linear forwards;
+}
+
+/* Ефект вибуху при запуску (можна додати через ::before) */
+.vfx-projectile.cannonball::before {
+    content: '';
+    position: absolute;
+    top: -10px; left: -10px;
+    width: 40px; height: 40px;
+    background: radial-gradient(circle, rgba(255,100,0,0.8), transparent);
+    border-radius: 50%;
+    animation: explosion-fade 0.2s ease-out forwards;
+}
+
+@keyframes fly-straight {
+    0% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(0); }
+    100% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(var(--travel-dist)); }
+}
+
+@keyframes explosion-fade {
+    0% { transform: scale(0.5); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+/* --- ЧЕРЕПОК (Deathrattle) --- */
+.vfx-skull {
+    font-size: 48px;
+    text-shadow: 0 0 3px darkred, 0 0 2px red;
+    transform: translate(-50%, -50%);
+    animation: skull-float 1.5s ease-out forwards;
+    filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+}
+
+@keyframes skull-float {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+    20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+    100% { transform: translate(-50%, -150%) scale(1.5); opacity: 0; }
+}

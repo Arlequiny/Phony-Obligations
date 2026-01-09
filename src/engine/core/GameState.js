@@ -58,6 +58,7 @@ function createCardInstance(cardId) {
         currentStats: { ...baseCard.stats }, // Поточні статти (поранення)
         traits: baseCard.traits,
         description: baseCard.description,
+        projectileType: baseCard.projectileType,
         image: baseCard.image,
         cost: baseCard.cost,
         canAttack: false,

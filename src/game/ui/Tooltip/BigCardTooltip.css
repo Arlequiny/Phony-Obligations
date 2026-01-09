@@ -1,0 +1,32 @@
+.big-tooltip-container {
+    position: fixed;
+    top: 50%;
+    left: 40px;
+    transform: translateY(-50%);
+
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 20px;
+
+    z-index: 9000;
+    pointer-events: none;
+}
+
+.big-card-scale-wrapper {
+    transform: scale(2.5);
+    transform-origin: top left;
+
+    width: calc(16px * 8);
+    height: calc(16px * 11);
+
+    margin-bottom: calc(16px * 11 * 1.5);
+}
+
+.big-tooltip-traits {
+    transform: scale(1.2);
+    transform-origin: top left;
+    margin-top: 16px;
+    margin-left: 192px;
+    width: 200px;
+}

@@ -6,14 +6,24 @@ const generateId = () => Math.random().toString(36).substr(2, 9);
 
 export function resolveEffect(state, effect, sourceCard, sourceOwner) {
     let newState = { ...state };
+    let affectedTargets = [];
 
     // 1. Визначаємо цілі
-    const targets = findTargets(newState, effect.payload.targetType, sourceOwner, sourceCard, effect.payload.count);
+    const targets = findTargets(
+        newState,
+        effect.payload.targetType,
+        sourceOwner,
+        sourceCard,
+        effect.payload.count,
+        effect.payload.excludeSelf
+    );
 
     // 2. Виконуємо дію
     switch (effect.action) {
         case EFFECT_ACTIONS.DAMAGE:
             targets.forEach(({ owner, index, card }) => {
+                affectedTargets.push({ owner, index });
+
                 // Працюємо виключно з currentStats
                 const stats = { ...card.currentStats };
                 let newTraits = [...card.traits];
@@ -50,7 +60,7 @@ export function resolveEffect(state, effect, sourceCard, sourceOwner) {
 
         case EFFECT_ACTIONS.BUFF_STATS:
             targets.forEach(({ owner, index, card }) => {
-                if (effect.payload.excludeSelf && card.instanceId === sourceCard.instanceId) return;
+                affectedTargets.push({ owner, index });
 
                 newState[owner].board[index] = {
                     ...card,
@@ -81,6 +91,7 @@ export function resolveEffect(state, effect, sourceCard, sourceOwner) {
                             instanceId: generateId(),
                             currentStats: {...template.stats},
                             hasAttacked: true, // Сумони не атакують одразу (ривок - окрема механіка)
+                            isJustDeployed: true,
                             traits: template.traits || [] // Важливо копіювати трейти
                         };
                     }
@@ -93,11 +104,11 @@ export function resolveEffect(state, effect, sourceCard, sourceOwner) {
             console.warn("Unknown effect action:", effect.action);
     }
 
-    return newState;
+    return { newState, affectedTargets };
 }
 
 // === ЛОГІКА ПОШУКУ ЦІЛЕЙ ===
-function findTargets(state, targetType, sourceOwner, sourceCard, count = 1) {
+function findTargets(state, targetType, sourceOwner, sourceCard, count = 1, excludeSelf = false) {
     const enemyOwner = sourceOwner === "player" ? "enemy" : "player";
 
     // Хелпер для збору всіх карт власника
@@ -129,6 +140,8 @@ function findTargets(state, targetType, sourceOwner, sourceCard, count = 1) {
         default:
             return [];
     }
+
+    if (excludeSelf) candidates = candidates.filter(c => c.card.instanceId !== sourceCard.instanceId);
 
     // Якщо це RANDOM - перемішуємо і беремо N
     if (targetType.includes("random")) {

@@ -37,7 +37,6 @@ export const saveManager = {
         window.location.reload();
     },
 
-    // Хелпер: позначити рівень як пройдений
     completeLevel: (levelId, nextLevelId, stats = {}) => {
         const current = saveManager.load();
 
@@ -45,13 +44,15 @@ export const saveManager = {
 
         const newStats = {
             completed: true,
-            attempts: (oldLevelStats.attempts || 0) + 1, // +1 спроба (хоча логіку спроб краще трекати окремо)
-            bestTime: stats.time ? Math.min(stats.time, oldLevelStats.bestTime || Infinity) : oldLevelStats.bestTime
+            attempts: (oldLevelStats.attempts || 0) + 1,
+            bestTime: stats.time
+                ? (oldLevelStats.bestTime ? Math.min(stats.time, oldLevelStats.bestTime) : stats.time)
+                : oldLevelStats.bestTime
         };
 
         saveManager.save({
             levels: { [levelId]: newStats },
-            currentLevelId: nextLevelId || levelId
+            ...(nextLevelId ? { currentLevelId: nextLevelId } : {})
         });
     }
 };

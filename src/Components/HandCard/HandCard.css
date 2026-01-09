@@ -21,8 +21,31 @@
     z-index: 100;
 }
 
+.hand-card.tooltip-mode {
+    /* Скидаємо поворот і скейл, щоб карта була рівною */
+    transform: none !important;
+
+    /* Відключаємо переходи */
+    transition: none !important;
+
+    /* Важливо: залишаємо relative, щоб діти (атака, хп) були всередині! */
+    position: relative !important;
+
+    /* Прибираємо курсор */
+    cursor: default;
+
+    /* Скидаємо відступи */
+    margin: 0;
+}
+
+.hand-card.tooltip-mode:hover {
+    transform: none !important;
+    z-index: 100 !important; /* Не піднімати z-index */
+}
+
 .hand-card:hover {
     transform: scale(1.75) rotate(0deg) translateY(-48px);
+    transition: none;
     z-index: 107;
 }
 
@@ -110,7 +133,7 @@
 }
 
 .hand-card .attack {
-    width: 44px;
+    width: 48px;
     height: 44px;
 
     left: -16px;
@@ -121,7 +144,7 @@
     background-repeat: no-repeat;
 
     padding-top: 0;
-    padding-left: 8px;
+    padding-left: 4px;
 }
 
 .hand-card .health {

@@ -64,14 +64,22 @@
     align-items: flex-start;
 }
 
+/*.game-title {*/
+/*    font-size: 7rem;*/
+/*    line-height: 0.9;*/
+/*    color: white;*/
+/*    font-family: 'Impact', sans-serif;*/
+/*    text-transform: uppercase;*/
+/*    text-shadow: 5px 5px 0 #000;*/
+/*    margin: 0;*/
+/*}*/
+
 .game-title {
-    font-size: 7rem;
-    line-height: 0.9;
-    color: white;
-    font-family: 'Impact', sans-serif;
-    text-transform: uppercase;
-    text-shadow: 5px 5px 0 #000;
     margin: 0;
+    height: 450px;
+    width: 600px;
+    background-image: url("/images/logo.png");
+    background-size: 600px;
 }
 
 .version-tag {

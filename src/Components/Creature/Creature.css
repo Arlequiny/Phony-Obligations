@@ -26,6 +26,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
+
+    transition: filter 0.3s, transform 0.3s;
 }
 
 .creature.taunt {
@@ -132,6 +134,76 @@
 
 .creature .insensate-icon {
     filter: contrast(1.2) hue-rotate(300deg);
-    bottom: -10px;
+    top: -10px;
+    right: -4px;
+    font-size: 32px;
+}
+
+.creature .deathrattle-icon {
+    filter: grayscale(0.7);
+    top: -12px;
     font-size: 28px;
+    text-shadow: 0 0 5px black, 0 0 3px black;
+}
+
+.creature .double-attack-icon {
+    top: -4px;
+    left: -4px;
+
+    background-image: url("/images/double_attack.png");
+    background-size: 48px;
+    transform: scale(-1, 1);
+}
+
+
+ /* DEATH */
+.creature.dying {
+    animation: death-shake-fade 0.7s ease-in forwards;
+}
+
+@keyframes death-shake-fade {
+    0% { filter: grayscale(50%); transform: scale(1); }
+    30% { filter: grayscale(100%); transform: scale(1.1) rotate(7deg); }
+    60% { filter: grayscale(100%); transform: scale(1.1) rotate(-7deg); opacity: 0.8; }
+    100% { filter: grayscale(100%); transform: scale(0.8); opacity: 0; }
+}
+
+/* BUFF */
+.creature.buffed .creature-image::after {
+    content: '';
+    position: absolute;
+    top: -5px; left: -5px; right: -5px; bottom: -5px;
+    border-radius: 50% / 60%;
+    box-shadow: 0 0 20px 5px rgba(9, 136, 4, 0.8);
+    opacity: 0;
+    animation: buff-flash 1s ease-out;
+}
+
+@keyframes buff-flash {
+    0% { opacity: 0; transform: scale(0.9); }
+    50% { opacity: 1; transform: scale(1.1); }
+    100% { opacity: 0; transform: scale(1.2); }
+}
+
+/* BATTLECRY */
+.creature .ability-icon {
+    filter: contrast(0.75) grayscale(.6);
+    bottom: -4px;
+    font-size: 28px;
+    z-index: 120;
+    pointer-events: none;
+}
+
+.creature.activating .ability-icon {
+    animation: ability-pop 0.6s ease-out;
+}
+
+@keyframes ability-pop {
+    0%   { filter: grayscale(.6); }
+    20%  { filter: grayscale(.3); }
+    40%  { filter: grayscale(.2); text-shadow: 0 0 5px yellow, 0 0 2px orange; }
+    50%  { filter: grayscale(.1); text-shadow: 0 0 10px yellow, 0 0 5px orange; }
+    60%  { filter: grayscale(.2); text-shadow: 0 0 5px yellow, 0 0 2px orange; }
+    80%  { filter: grayscale(.3); }
+    100% { filter: grayscale(.6); }
 }

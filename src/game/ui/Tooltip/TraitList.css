@@ -1,0 +1,39 @@
+.trait-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 220px;
+
+    margin-top: 0;
+    padding-top: 0;
+
+    animation: fade-in-up 0.3s ease-out;
+}
+
+.trait-box {
+    background: rgba(20, 20, 20, 0.95);
+    border-left: 4px solid #f1c40f;
+    padding: 8px 12px;
+    border-radius: 4px;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+.trait-box h5 {
+    margin: 0 0 4px 0;
+    color: #f1c40f;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.trait-box p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.3;
+    color: #ecf0f1;
+}
+
+@keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

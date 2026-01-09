@@ -19,7 +19,6 @@ export class GameEngine {
         // Ми завжди працюємо з копією стейту, або використовуємо методи, що повертають копію
         // Для спрощення тут я буду мутувати this.state, але в ідеалі треба immutable pattern.
         // Оскільки ми просто вчимося - пряма мутація this.state допустима,
-        // ЯКЩО ти потім робиш глибоку копію для React (ми це робимо в GameProvider).
 
         switch (intent.type) {
             case INTENTS.DEPLOY_CARD:

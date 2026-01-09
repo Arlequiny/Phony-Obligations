@@ -1,0 +1,22 @@
+{
+  "name": "Phony Obligations",
+  "short_name": "P.O.",
+  "start_url": ".",
+  "display": "fullscreen",
+  "background_color": "#1a252f",
+  "theme_color": "#2c3e50",
+  "description": "Strategic Card Battler",
+  "orientation": "landscape",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "icons/iconL.png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "icons/icon.png"
+    }
+  ]
+}

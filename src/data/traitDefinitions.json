@@ -1,0 +1,34 @@
+{
+  "TAUNT": {
+    "title": "Taunt",
+    "description": "Enemies must attack this minion first."
+  },
+  "STEALTH": {
+    "title": "Stealth",
+    "description": "Cannot be targeted until it attacks."
+  },
+  "GLASS_FRAME": {
+    "title": "Glass Frame",
+    "description": "The first damage taken is reduced to 0."
+  },
+  "INSENSATE": {
+    "title": "Insensate",
+    "description": "Cannot attack."
+  },
+  "DOUBLE_ATTACK": {
+    "title": "Double Attack",
+    "description": "Can attack twice per turn."
+  },
+  "PERISHING": {
+    "title": "Perishing",
+    "description": "Dies automatically after X turns."
+  },
+  "BATTLECRY": {
+    "title": "Battlecry",
+    "description": "Effect triggers when owner's turn started."
+  },
+  "DEATHRATTLE": {
+    "title": "Deathrattle",
+    "description": "Effect triggers when this minion dies."
+  }
+}

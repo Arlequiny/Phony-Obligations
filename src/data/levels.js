@@ -5,7 +5,7 @@ export const LEVELS = [
         id: "level-1",
         name: "Rat Infestation",
         description: "Clearing the cellar from pests.",
-        initialMoney: 5,
+        initialMoney: 8,
         enemyHeroHealth: 20,
         config: {
             playerHand: {
@@ -14,9 +14,9 @@ export const LEVELS = [
             }
         },
         enemyBoard: [
-            { slotIndex: 2, cardId: "c_mole_06" }, // Слабкий кріт
+            { slotIndex: 2, cardId: "c_mole_06" },
             { slotIndex: 4, cardId: "c_mole_06" },
-            { slotIndex: 5, cardId: "c_peasant_01" } // Селянин-зрадник
+            { slotIndex: 5, cardId: "c_peasant_01" }
         ],
         reward: 50,
         unlocks: "level-2"
@@ -116,6 +116,84 @@ export const LEVELS = [
         ],
         reward: 300,
         unlocks: null // Фінал
+    },
+
+    // РІВЕНЬ 6: "Armored Division"
+    // Мета: Пробивання броні. Вороги мають багато броні і щитів.
+    // Гравцю знадобляться маги (ігнор броні? поки немає) або сильні удари.
+    {
+        id: "level-6",
+        name: "Ironclad Wall",
+        description: "Their armor is thick. Hit hard.",
+        initialMoney: 22,
+        enemyHeroHealth: 45,
+        config: {
+            playerHand: {
+                type: "fixed",
+                // Даємо гравцю сильних бійців: Огр (6 атаки), Вітя (7 атаки)
+                cardIds: ["c_boulderfist-ogre_13", "c_barb_16", "c_maduro_10", "c_goblin_02"]
+            }
+        },
+        enemyBoard: [
+            { slotIndex: 1, cardId: "c_maduro_10" }, // Taunt + Armor
+            { slotIndex: 3, cardId: "c_old_turtle_21" }, // Armor + Summon
+            { slotIndex: 5, cardId: "c_maduro_10" }  // Taunt + Armor
+        ],
+        reward: 200,
+        unlocks: "level-7"
+    },
+
+    // РІВЕНЬ 7: "The Glass Circus"
+    // Мета: Скляні гармати. Вороги мають мало ХП, але величезну атаку + Glass Frame.
+    // Гравцю треба дешеві юніти (щоб збити скло) + танки (щоб витримати удар).
+    {
+        id: "level-7",
+        name: "Glass Assassins",
+        description: "One hit to break, one hit to kill.",
+        initialMoney: 25,
+        enemyHeroHealth: 40,
+        config: {
+            playerHand: {
+                type: "fixed",
+                // Гравцю треба багато дрібних (щоб збивати щити) і танки
+                cardIds: ["c_pupbot_07", "c_pupbot_07", "c_tower_04", "c_onix_11", "c_castle_cannon_18"]
+            }
+        },
+        enemyBoard: [
+            { slotIndex: 0, cardId: "c_pupbot_07" }, // Glass
+            { slotIndex: 2, cardId: "c_ember_14" },  // Glass + Taunt
+            { slotIndex: 4, cardId: "c_Verminaard_15" }, // BOSS Unit (Glass) - б'є боляче!
+            { slotIndex: 6, cardId: "c_pupbot_07" }
+        ],
+        reward: 250,
+        unlocks: "level-8"
+    },
+
+    // РІВЕНЬ 8: "FINAL BOSS - The Necromancer"
+    // Мета: Комбінація всього. Хрипи, Стелс, Таунт.
+    // Це має бути епічно.
+    {
+        id: "level-8",
+        name: "Kel'Thuzad's Cat",
+        description: "The final challenge.",
+        initialMoney: 30, // Багато грошей, бо треба повна армія
+        enemyHeroHealth: 80, // Жирний герой
+        config: {
+            playerHand: {
+                type: "fixed",
+                // Даємо гравцю "Dream Team"
+                cardIds: ["c_onix_11", "c_barb_16", "c_spirit_03", "c_castle_cannon_18", "c_menagerie-jug_12", "c_natrix_05"]
+            }
+        },
+        enemyBoard: [
+            { slotIndex: 1, cardId: "c_nerubian_egg_08" }, // Смертельний хрип
+            { slotIndex: 2, cardId: "c_frozen_elemental_20" }, // Танк
+            { slotIndex: 3, cardId: "c_Verminaard_15" },   // Головний дамагер
+            { slotIndex: 4, cardId: "c_menagerie-jug_12" }, // Бафер
+            { slotIndex: 5, cardId: "c_natrix_05" }        // Стелс
+        ],
+        reward: 0,
+        unlocks: null
     }
 ];
 

@@ -10,10 +10,13 @@ const GameContext = createContext(null);
 // Час затримок для різних подій (в мс)
 const DELAYS = {
     [EVENTS.ATTACK_INIT]: 800,
-    [EVENTS.DAMAGE_DEALT]: 800,
+    [EVENTS.DAMAGE_DEALT]: 600,
     [EVENTS.DEATH_PROCESS]: 700,
     [EVENTS.TRANSITION_PHASE]: 1500,
-    [EVENTS.GAME_OVER]: 2000
+    [EVENTS.GAME_OVER]: 2000,
+    [EVENTS.ABILITY_TRIGGER]: 600,
+    [EVENTS.BUFF_APPLIED]: 800,
+    [EVENTS.PROJECTILE_FIRED]: 250
 };
 
 export function GameProvider({ children }) {

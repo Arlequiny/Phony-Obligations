@@ -11,14 +11,14 @@ export const KILL_REWARDS = {
 };
 
 export const TRAIT_TYPES = {
-    BATTLECRY: "battlecry",         // runs every start of round
-    DEATHRATTLE: "deathrattle",     // runs upon death
-    TAUNT: "taunt",                 // can be the only target
-    GLASS_FRAME: "glass_frame",     // the first damage = 0
-    DOUBLE_ATTACK: "double_attack", // can attack 2 times per turn
-    PERISHING: "perishing",         // dies upon N turns
-    STEALTH: "stealth",             // can be targeted upon first attack
-    INSENSATE: "insensate"          // buildings
+    BATTLECRY: "BATTLECRY",         // runs every start of round
+    DEATHRATTLE: "DEATHRATTLE",     // runs upon death
+    TAUNT: "TAUNT",                 // can be the only target
+    GLASS_FRAME: "GLASS_FRAME",     // the first damage = 0
+    DOUBLE_ATTACK: "DOUBLE_ATTACK", // can attack 2 times per turn
+    PERISHING: "PERISHING",         // dies upon N turns
+    STEALTH: "STEALTH",             // can be targeted upon first attack
+    INSENSATE: "INSENSATE"          // buildings
 };
 
 export const EFFECT_ACTIONS = {

@@ -37,12 +37,20 @@
     box-shadow: 0 0 50px rgba(192, 57, 43, 0.3);
 }
 
-.result-title {
-    font-size: 48px;
-    font-weight: bold;
-    margin-bottom: 20px;
-    color: white;
-    font-family: "Carnevalee Freakshow", sans-serif;
+/*.result-title {*/
+/*    font-size: 48px;*/
+/*    font-weight: bold;*/
+/*    color: white;*/
+/*    font-family: "Carnevalee Freakshow", sans-serif;*/
+
+/*    margin-bottom: 20px;*/
+/*}*/
+
+.result-logo {
+    width: 600px;
+    height: 200px;
+
+    background-size: 600px;
 }
 
 .victory .result-title { color: #f1c40f; }

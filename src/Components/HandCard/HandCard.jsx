@@ -1,9 +1,15 @@
 import "./HandCard.css";
+import { generateCardDescription } from "../../utils/textGenerator";
+import DescriptionRenderer from "../../utils/DescriptionRenderer";
+import { useMemo } from "react";
 
-export default function HandCard({ card, onClick, isSelected }) {
+export default function HandCard({ card, onClick, isSelected, isTooltip }) {
+    const description = useMemo(() => generateCardDescription(card), [card]);
+    const fontSize = description.length > 50 ? "10px" : "12px";
+
     return (
         <div
-            className={`hand-card ${isSelected ? "selected" : ""}`}
+            className={`hand-card ${isSelected ? "selected" : ""} ${isTooltip ? "tooltip-mode" : ""}`}
             onClick={onClick}
         >
             <div className="card-background"/>
@@ -27,7 +33,9 @@ export default function HandCard({ card, onClick, isSelected }) {
                 </svg>
 
             </div>
-            <div className="card-desc"> {card.description} </div>
+            <div className="card-desc" style={{ fontSize: fontSize }}>
+                <DescriptionRenderer text={description} />
+            </div>
             <div className="stat attack">{card.stats.attack}</div>
             <div className="stat health">{card.stats.health}</div>
         </div>
